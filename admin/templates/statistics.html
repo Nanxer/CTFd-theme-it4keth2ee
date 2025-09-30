@@ -1,0 +1,452 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="jumbotron cyber-glow">
+	<div class="container-fluid">
+		<h1>统计面板</h1>
+		<p class="lead text-cyber-secondary">实时监控平台数据与用户活动</p>
+	</div>
+</div>
+
+<!-- 统计概览卡片 -->
+<div class="container-fluid mb-4">
+	<div class="row">
+		<div class="col-md-3">
+			<div class="card cyber-glow h-100">
+				<div class="card-body text-center">
+					<h3 class="text-cyber-neon"><i class="fas fa-users mr-2"></i>{{ user_count }}</h3>
+					<p class="text-cyber-secondary">用户已注册</p>
+					{% if get_config('user_mode') == 'teams' %}
+					<h5 class="text-cyber-neon"><i class="fas fa-users mr-2"></i>{{ team_count }}</h5>
+					<p class="text-cyber-secondary">团队已注册</p>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card cyber-glow h-100">
+				<div class="card-body text-center">
+					<h3 class="text-cyber-neon"><i class="fas fa-globe mr-2"></i>{{ ip_count }}</h3>
+					<p class="text-cyber-secondary">IP地址</p>
+					<h5 class="text-cyber-neon"><i class="fas fa-star mr-2"></i>{{ total_points }}</h5>
+					<p class="text-cyber-secondary">总可能分数</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card cyber-glow h-100">
+				<div class="card-body text-center">
+					<h3 class="text-cyber-neon"><i class="fas fa-puzzle-piece mr-2"></i>{{ challenge_count }}</h3>
+					<p class="text-cyber-secondary">题目数量</p>
+					{% if most_solved %}
+					<h5 class="text-cyber-neon"><i class="fas fa-trophy mr-2"></i>{{ solve_data[most_solved] }}</h5>
+					<p class="text-cyber-secondary">{{ most_solved }} 解出次数</p>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card cyber-glow h-100">
+				<div class="card-body text-center">
+					<h3 class="text-cyber-success"><i class="fas fa-check-circle mr-2"></i>{{ solve_count }}</h3>
+					<p class="text-cyber-secondary">正确提交</p>
+					<h5 class="text-cyber-danger"><i class="fas fa-times-circle mr-2"></i>{{ wrong_count }}</h5>
+					<p class="text-cyber-secondary">错误提交</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- 玩家进度矩阵 -->
+<div class="container-fluid mb-4">
+	<div class="card cyber-glow">
+		<div class="card-header">
+			<h3 class="mb-0"><i class="fas fa-table mr-2"></i>玩家进度矩阵 <sup class="text-cyber-secondary">(前100名)</sup></h3>
+		</div>
+		<div class="card-body p-0">
+			<div class="matrix-container">
+				<table class="table table-dark table-bordered table-sm mb-0" id="matrix-scoreboard">
+					<thead>
+						<tr>
+							<th class="text-cyber-neon sticky-col" style="width: 60px;">排名</th>
+							<th class="text-cyber-neon sticky-col" style="left: 60px; min-width: 200px; max-width: 200px;">
+								{% if get_config('user_mode') == 'teams' %}团队{% else %}用户{% endif %}
+							</th>
+							<th class="text-cyber-neon" style="width: 80px;">分数</th>
+							{% for challenge in all_challenges %}
+							<th class="text-center text-cyber-neon challenge-header">
+								<a href="{{ url_for('admin.challenges_detail', challenge_id=challenge.id) }}" class="text-cyber-neon">
+									<div>{{ challenge.name }}</div>
+									<small>{{ challenge.value }}pt</small>
+								</a>
+							</th>
+							{% endfor %}
+						</tr>
+					</thead>
+					<tbody>
+						{% for user in top_users %}
+						<tr>
+							<td class="font-weight-bold text-cyber-neon">{{ loop.index }}</td>
+							<td class="sticky-col font-weight-bold text-cyber-neon" style="left: 60px;" title="{{ user.name }}">
+								{% if get_config('user_mode') == 'teams' %}
+									<a href="{{ url_for('admin.teams_detail', team_id=user.account_id) }}" class="text-cyber-neon">{{ user.name }}</a>
+								{% else %}
+									<a href="{{ url_for('admin.users_detail', user_id=user.account_id) }}" class="text-cyber-neon">{{ user.name }}</a>
+								{% endif %}
+							</td>
+							<td class="font-weight-bold text-cyber-neon">{{ user.score }}</td>
+							{% for challenge in all_challenges %}
+								{% set is_solved = challenge.id in account_solves[user.account_id]['solved_challenges'] %}
+								{% set is_attempted = challenge.id in account_solves[user.account_id]['attempted_challenges'] %}
+								{% set is_opened = challenge.id in account_solves[user.account_id]['opened_challenges'] %}
+								{% if is_solved %}
+									{% set bg_color = 'var(--cyber-neon-green)' %}
+									{% set text_color = 'var(--cyber-dark-bg)' %}
+									{% set symbol = '✓' %}
+								{% elif is_attempted and not is_solved %}
+									{% set bg_color = 'var(--cyber-neon-magenta)' %}
+									{% set text_color = 'var(--cyber-text-contrast)' %}
+									{% set symbol = '!' %}
+								{% elif is_opened and not is_attempted and not is_solved %}
+									{% set bg_color = 'var(--cyber-neon-cyan)' %}
+									{% set text_color = 'var(--cyber-dark-bg)' %}
+									{% set symbol = '○' %}
+								{% else %}
+									{% set bg_color = 'var(--cyber-dark-surface)' %}
+									{% set text_color = 'var(--cyber-text-secondary)' %}
+									{% set symbol = '—' %}
+								{% endif %}
+								<td class="text-center cyber-cell" style="background-color: {{ bg_color }}; color: {{ text_color }};">
+									{{ symbol }}
+								</td>
+							{% endfor %}
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			
+			<div class="p-3">
+				<div class="d-flex flex-wrap justify-content-center">
+					<div class="mr-4 mb-2 d-flex align-items-center">
+						<span class="badge cyber-badge mr-2" style="background-color: var(--cyber-neon-green); color: var(--cyber-dark-bg);">✓</span>
+						<small class="text-cyber-secondary">已解决</small>
+					</div>
+					<div class="mr-4 mb-2 d-flex align-items-center">
+						<span class="badge cyber-badge mr-2" style="background-color: var(--cyber-neon-magenta); color: var(--cyber-text-contrast);">!</span>
+						<small class="text-cyber-secondary">已尝试</small>
+					</div>
+					<div class="mr-4 mb-2 d-flex align-items-center">
+						<span class="badge cyber-badge mr-2" style="background-color: var(--cyber-neon-cyan); color: var(--cyber-dark-bg);">○</span>
+						<small class="text-cyber-secondary">已打开</small>
+					</div>
+					<div class="mr-4 mb-2 d-flex align-items-center">
+						<span class="badge cyber-badge mr-2" style="background-color: var(--cyber-dark-surface); color: var(--cyber-text-secondary); border: 1px solid var(--cyber-neon-cyan);">—</span>
+						<small class="text-cyber-secondary">未查看</small>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- 图表区域 -->
+<div class="container-fluid">
+	<div class="row">
+		<!-- 解决次数图表 -->
+		<div class="col-lg-6 mb-4">
+			<div class="card cyber-glow h-100">
+				<div class="card-header">
+					<h4 class="mb-0"><i class="fas fa-chart-bar mr-2"></i>题目解决统计</h4>
+				</div>
+				<div class="card-body p-0">
+					<div id="solves-graph" class="chart-container">
+						<div class="text-center w-100 py-5">
+							<i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner text-cyber-neon"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- 分数分布图表 -->
+		<div class="col-lg-6 mb-4">
+			<div class="card cyber-glow h-100">
+				<div class="card-header">
+					<h4 class="mb-0"><i class="fas fa-chart-line mr-2"></i>分数分布</h4>
+				</div>
+				<div class="card-body p-0">
+					<div id="score-distribution-graph" class="chart-container">
+						<div class="text-center w-100 py-5">
+							<i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner text-cyber-neon"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- 解决百分比图表 -->
+		<div class="col-lg-6 mb-4">
+			<div class="card cyber-glow h-100">
+				<div class="card-header">
+					<h4 class="mb-0"><i class="fas fa-percentage mr-2"></i>解决百分比</h4>
+				</div>
+				<div class="card-body p-0">
+					<div id="solve-percentages-graph" class="chart-container">
+						<div class="text-center w-100 py-5">
+							<i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner text-cyber-neon"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- 提交统计饼图 -->
+		<div class="col-lg-6 mb-4">
+			<div class="card cyber-glow h-100">
+				<div class="card-header">
+					<h4 class="mb-0"><i class="fas fa-chart-pie mr-2"></i>提交统计</h4>
+				</div>
+				<div class="card-body p-0">
+					<div id="keys-pie-graph" class="chart-container">
+						<div class="text-center w-100 py-5">
+							<i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner text-cyber-neon"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- 分类统计饼图 -->
+		<div class="col-lg-6 mb-4">
+			<div class="card cyber-glow h-100">
+				<div class="card-header">
+					<h4 class="mb-0"><i class="fas fa-tags mr-2"></i>题目分类</h4>
+				</div>
+				<div class="card-body p-0">
+					<div id="categories-pie-graph" class="chart-container">
+						<div class="text-center w-100 py-5">
+							<i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner text-cyber-neon"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- 分数统计饼图 -->
+		<div class="col-lg-6 mb-4">
+			<div class="card cyber-glow h-100">
+				<div class="card-header">
+					<h4 class="mb-0"><i class="fas fa-star mr-2"></i>分数分布</h4>
+				</div>
+				<div class="card-body p-0">
+					<div id="points-pie-graph" class="chart-container">
+						<div class="text-center w-100 py-5">
+							<i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner text-cyber-neon"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+/* 统计页面专用样式 */
+.text-cyber-neon {
+	color: var(--cyber-neon-cyan) !important;
+	text-shadow: 0 0 5px currentColor;
+}
+
+.text-cyber-secondary {
+	color: var(--cyber-text-secondary) !important;
+}
+
+.text-cyber-success {
+	color: var(--cyber-neon-green) !important;
+	text-shadow: 0 0 5px currentColor;
+}
+
+.text-cyber-danger {
+	color: #ff0066 !important;
+	text-shadow: 0 0 5px currentColor;
+}
+
+.cyber-badge {
+	border-radius: 3px;
+	padding: 4px 8px;
+	font-size: 12px;
+	font-weight: bold;
+	border: 1px solid transparent;
+}
+
+.cyber-cell {
+	height: 30px;
+	border: 1px solid rgba(0, 255, 255, 0.3) !important;
+	font-weight: bold;
+	font-size: 14px;
+	transition: all 0.3s ease;
+}
+
+.cyber-cell:hover {
+	transform: scale(1.1);
+	box-shadow: 0 0 10px currentColor;
+	z-index: 10;
+}
+
+#matrix-scoreboard {
+	font-size: 12px;
+	background: var(--cyber-dark-surface);
+	border: 1px solid var(--cyber-neon-cyan);
+}
+
+#matrix-scoreboard th {
+	vertical-align: bottom;
+	padding: 8px 4px;
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background: rgba(0, 255, 255, 0.1) !important;
+	border-bottom: 2px solid var(--cyber-neon-cyan);
+	font-weight: 600;
+}
+
+#matrix-scoreboard td {
+	padding: 4px 2px;
+	text-align: center;
+	vertical-align: middle;
+	border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+#matrix-scoreboard .sticky-col {
+	position: sticky;
+	z-index: 5;
+	background: rgba(0, 255, 255, 0.05);
+}
+
+#matrix-scoreboard thead .sticky-col {
+	z-index: 20;
+	background: rgba(0, 255, 255, 0.1);
+}
+
+#matrix-scoreboard tbody .sticky-col {
+	z-index: 5;
+}
+
+.matrix-container {
+	height: 600px;
+	overflow: auto;
+	border: 1px solid var(--cyber-neon-cyan);
+	box-shadow: 0 0 15px var(--cyber-neon-cyan);
+	border-radius: 3px;
+}
+
+.challenge-header {
+	writing-mode: vertical-rl;
+	text-orientation: mixed;
+	height: 120px;
+	white-space: nowrap;
+	font-size: 10px;
+	font-weight: 600;
+}
+
+.challenge-header a {
+	text-decoration: none !important;
+	display: block;
+	padding: 5px 0;
+}
+
+.challenge-header small {
+	font-size: 8px;
+	opacity: 0.8;
+}
+
+/* 图表容器样式 */
+.chart-container {
+	height: 400px;
+	min-height: 400px;
+	position: relative;
+}
+
+.chart-container .spinner {
+	color: var(--cyber-neon-cyan);
+	text-shadow: 0 0 10px currentColor;
+}
+
+/* 卡片样式优化 */
+.card.cyber-glow {
+	transition: all 0.3s ease;
+}
+
+.card.cyber-glow:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 0 20px var(--cyber-neon-cyan);
+}
+
+.card-header {
+	background: rgba(0, 255, 255, 0.1);
+	border-bottom: 1px solid var(--cyber-neon-cyan);
+	padding: 1rem 1.25rem;
+}
+
+.card-body {
+	background: var(--cyber-dark-surface);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+	.matrix-container {
+		height: 400px;
+	}
+	
+	.chart-container {
+		height: 300px;
+		min-height: 300px;
+	}
+	
+	.challenge-header {
+		height: 80px;
+		font-size: 8px;
+	}
+	
+	#matrix-scoreboard {
+		font-size: 10px;
+	}
+	
+	.cyber-cell {
+		height: 25px;
+		font-size: 12px;
+	}
+}
+
+@media (max-width: 576px) {
+	.matrix-container {
+		height: 300px;
+	}
+	
+	.chart-container {
+		height: 250px;
+		min-height: 250px;
+	}
+}
+
+/* ECharts 主题适配 */
+.echarts-tooltip {
+	background: var(--cyber-dark-surface) !important;
+	border: 1px solid var(--cyber-neon-cyan) !important;
+	box-shadow: 0 0 10px var(--cyber-neon-cyan) !important;
+	color: var(--cyber-text-primary) !important;
+}
+
+.echarts-legend {
+	color: var(--cyber-text-primary) !important;
+}
+</style>
+{% endblock %}
+
+{% block entrypoint %}
+	{{ Assets.js("assets/js/pages/statistics.js", theme="admin") }}
+{% endblock %}

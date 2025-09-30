@@ -1,0 +1,287 @@
+@import "~/codemirror/lib/codemirror.css";
+@import "includes/easymde.scss";
+
+// CodeMirror 赛博朋克主题美化
+.CodeMirror {
+  font-family: 'Courier New', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  background: var(--cyber-dark-surface) !important;
+  color: var(--cyber-text-primary) !important;
+  border: 2px solid var(--cyber-neon-cyan) !important;
+  border-radius: 6px !important;
+  box-shadow: 
+    0 0 20px var(--cyber-neon-cyan),
+    inset 0 0 10px rgba(0, 255, 255, 0.1) !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.CodeMirror:hover {
+  border-color: var(--cyber-neon-magenta) !important;
+  box-shadow: 
+    0 0 25px var(--cyber-neon-magenta),
+    inset 0 0 15px rgba(255, 0, 255, 0.1) !important;
+  transform: translateY(-2px) !important;
+}
+
+.CodeMirror-focused {
+  border-color: var(--cyber-neon-green) !important;
+  box-shadow: 
+    0 0 30px var(--cyber-neon-green),
+    inset 0 0 20px rgba(0, 255, 136, 0.2) !important;
+  animation: editorPulse 3s ease-in-out infinite !important;
+}
+
+@keyframes editorPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 30px var(--cyber-neon-green),
+      inset 0 0 20px rgba(0, 255, 136, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px var(--cyber-neon-green),
+      inset 0 0 30px rgba(0, 255, 136, 0.3);
+  }
+}
+
+// 滚动条美化
+.CodeMirror-scrollbar {
+  background: rgba(0, 255, 255, 0.1) !important;
+}
+
+.CodeMirror-scrollbar-thumb {
+  background: var(--cyber-neon-cyan) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 10px var(--cyber-neon-cyan) !important;
+}
+
+.CodeMirror-scrollbar-thumb:hover {
+  background: var(--cyber-neon-magenta) !important;
+  box-shadow: 0 0 15px var(--cyber-neon-magenta) !important;
+}
+
+// 光标样式
+.CodeMirror-cursor {
+  border-left: 2px solid var(--cyber-neon-cyan) !important;
+  box-shadow: 0 0 10px var(--cyber-neon-cyan) !important;
+  animation: cursorBlink 1.2s step-end infinite !important;
+}
+
+@keyframes cursorBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+// 选中文本样式
+.CodeMirror-selected {
+  background: rgba(0, 255, 255, 0.3) !important;
+  box-shadow: 0 0 10px var(--cyber-neon-cyan) !important;
+}
+
+// 行号美化
+.CodeMirror-gutters {
+  background: var(--cyber-dark-bg) !important;
+  border-right: 2px solid var(--cyber-neon-cyan) !important;
+  box-shadow: 
+    0 0 15px var(--cyber-neon-cyan),
+    inset 0 0 10px rgba(0, 255, 255, 0.1) !important;
+}
+
+.CodeMirror-linenumber {
+  color: var(--cyber-text-secondary) !important;
+  font-family: 'Courier New', monospace !important;
+  font-size: 12px !important;
+  text-align: center !important;
+  padding: 0 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+.CodeMirror-linenumber:hover {
+  color: var(--cyber-neon-cyan) !important;
+  text-shadow: 0 0 5px var(--cyber-neon-cyan) !important;
+  background: rgba(0, 255, 255, 0.1) !important;
+}
+
+// 语法高亮美化
+.cm-keyword {
+  color: var(--cyber-neon-cyan) !important;
+  font-weight: bold !important;
+}
+
+.cm-variable {
+  color: var(--cyber-text-primary) !important;
+}
+
+.cm-variable-2 {
+  color: var(--cyber-neon-purple) !important;
+}
+
+.cm-variable-3 {
+  color: var(--cyber-neon-magenta) !important;
+}
+
+.cm-string {
+  color: var(--cyber-neon-green) !important;
+}
+
+.cm-number {
+  color: var(--cyber-neon-purple) !important;
+}
+
+.cm-comment {
+  color: var(--cyber-text-secondary) !important;
+  font-style: italic !important;
+}
+
+.cm-operator {
+  color: var(--cyber-neon-magenta) !important;
+}
+
+.cm-builtin {
+  color: var(--cyber-neon-green) !important;
+}
+
+.cm-def {
+  color: var(--cyber-neon-cyan) !important;
+  font-weight: bold !important;
+}
+
+.cm-property {
+  color: var(--cyber-neon-purple) !important;
+}
+
+.cm-atom {
+  color: var(--cyber-neon-magenta) !important;
+}
+
+.cm-tag {
+  color: var(--cyber-neon-green) !important;
+}
+
+.cm-attribute {
+  color: var(--cyber-neon-cyan) !important;
+}
+
+.cm-meta {
+  color: var(--cyber-neon-purple) !important;
+}
+
+// 错误和警告样式
+.cm-error {
+  color: #ff0066 !important;
+  background: rgba(255, 0, 102, 0.1) !important;
+  text-shadow: 0 0 10px #ff0066 !important;
+  border-bottom: 2px solid #ff0066 !important;
+}
+
+.cm-warning {
+  color: #ffaa00 !important;
+  background: rgba(255, 170, 0, 0.1) !important;
+  text-shadow: 0 0 10px #ffaa00 !important;
+  border-bottom: 2px solid #ffaa00 !important;
+}
+
+// 匹配括号高亮
+.CodeMirror-matchingbracket {
+  color: var(--cyber-neon-green) !important;
+  background: rgba(0, 255, 136, 0.2) !important;
+  text-shadow: 0 0 10px var(--cyber-neon-green) !important;
+  border: 1px solid var(--cyber-neon-green) !important;
+  box-shadow: 0 0 15px var(--cyber-neon-green) !important;
+}
+
+.CodeMirror-nonmatchingbracket {
+  color: #ff0066 !important;
+  background: rgba(255, 0, 102, 0.2) !important;
+  text-shadow: 0 0 10px #ff0066 !important;
+  border: 1px solid #ff0066 !important;
+}
+
+// 搜索高亮
+.CodeMirror-searching {
+  background: rgba(255, 255, 0, 0.3) !important;
+  color: #ffff00 !important;
+  text-shadow: 0 0 10px #ffff00 !important;
+  border: 1px solid #ffff00 !important;
+}
+
+// 活动行高亮
+.CodeMirror-activeline-background {
+  background: rgba(0, 255, 255, 0.1) !important;
+  box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.2) !important;
+}
+
+// 折叠代码块
+.CodeMirror-foldmarker {
+  color: var(--cyber-neon-cyan) !important;
+  text-shadow: 0 0 5px var(--cyber-neon-cyan) !important;
+  background: rgba(0, 255, 255, 0.2) !important;
+  border-radius: 2px !important;
+  padding: 0 4px !important;
+}
+
+.CodeMirror-foldgutter {
+  width: 16px !important;
+}
+
+.CodeMirror-foldgutter-open,
+.CodeMirror-foldgutter-folded {
+  color: var(--cyber-text-secondary) !important;
+}
+
+.CodeMirror-foldgutter-open:hover,
+.CodeMirror-foldgutter-folded:hover {
+  color: var(--cyber-neon-cyan) !important;
+  text-shadow: 0 0 5px var(--cyber-neon-cyan) !important;
+}
+
+// 编辑器工具栏美化
+.CodeMirror-dialog {
+  background: var(--cyber-dark-bg) !important;
+  border-bottom: 2px solid var(--cyber-neon-cyan) !important;
+  color: var(--cyber-text-primary) !important;
+  box-shadow: 0 2px 10px var(--cyber-neon-cyan) !important;
+}
+
+.CodeMirror-dialog input {
+  background: var(--cyber-dark-surface) !important;
+  border: 1px solid var(--cyber-neon-cyan) !important;
+  color: var(--cyber-text-primary) !important;
+  border-radius: 3px !important;
+  padding: 4px 8px !important;
+}
+
+.CodeMirror-dialog input:focus {
+  border-color: var(--cyber-neon-magenta) !important;
+  box-shadow: 0 0 10px var(--cyber-neon-magenta) !important;
+}
+
+// 响应式调整
+@media (max-width: 768px) {
+  .CodeMirror {
+    font-size: 12px !important;
+    border-width: 1px !important;
+  }
+  
+  .CodeMirror-gutters {
+    border-right-width: 1px !important;
+  }
+}
+
+// 打印样式
+@media print {
+  .CodeMirror {
+    border: 1px solid #000 !important;
+    box-shadow: none !important;
+    background: white !important;
+    color: black !important;
+  }
+  
+  .CodeMirror-gutters {
+    background: #f0f0f0 !important;
+    border-right: 1px solid #ccc !important;
+  }
+}

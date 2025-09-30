@@ -1,0 +1,474 @@
+{% extends "admin/base.html" %}
+
+{% block stylesheets %}
+	<link rel="stylesheet" type="text/css" href="{{ url_for('views.themes', theme='admin', path='css/codemirror.css') }}">
+	<style>
+		.cyber-jumbotron {
+			background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+			border-bottom: 2px solid #00ffff;
+			box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+		}
+
+		.cyber-jumbotron h1 {
+			color: #00ffff;
+			text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+			font-weight: 700;
+		}
+
+		.cyber-jumbotron .lead {
+			color: #e6e6e6;
+			font-size: 1.1rem;
+		}
+
+		.section-divider {
+			border-top: 1px solid #333;
+			margin: 1rem 0;
+			padding-top: 1rem;
+		}
+
+		.danger-divider {
+			border-top: 2px solid #dc3545;
+			margin: 1.5rem 0;
+			padding-top: 1rem;
+		}
+
+		.text-cyber-danger {
+			color: #ff4444 !important;
+		}
+
+		.nav-link {
+			color: #b8b8b8;
+			transition: all 0.3s ease;
+			border-radius: 4px;
+			margin-bottom: 0.25rem;
+		}
+
+		.nav-link:hover {
+			color: #00ffff;
+			background-color: rgba(0, 255, 255, 0.1);
+			transform: translateX(5px);
+		}
+
+		.nav-link.active {
+			color: #00ffff !important;
+			background-color: rgba(0, 255, 255, 0.2);
+			border-left: 3px solid #00ffff;
+			font-weight: 600;
+		}
+
+		.card {
+			border: 1px solid #333;
+			background: #1a1a2e;
+			border-radius: 8px;
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+			transition: all 0.3s ease;
+		}
+
+		.card:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
+		}
+
+		.card-header {
+			background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+			border-bottom: 1px solid #00ffff;
+			color: #00ffff;
+			font-weight: 600;
+			border-radius: 8px 8px 0 0 !important;
+		}
+
+		.cyber-alert {
+			background: linear-gradient(135deg, #2d1a1a 0%, #3d1f1f 100%);
+			border: 1px solid #ff4444;
+			color: #ffcccc;
+			border-radius: 6px;
+			box-shadow: 0 2px 8px rgba(255, 68, 68, 0.2);
+		}
+
+		.cyber-tab-content {
+			background: #1a1a2e;
+			border-radius: 8px;
+			padding: 1.5rem;
+			border: 1px solid #333;
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+		}
+
+		.cyber-config-section {
+			background: transparent;
+			border: none;
+			padding: 0;
+		}
+
+		.danger-section {
+			border-left: 3px solid #ff4444;
+			padding-left: 1rem;
+		}
+
+		.form-control {
+			background: #2d2d44;
+			border: 1px solid #444;
+			color: #e6e6e6;
+			border-radius: 4px;
+		}
+
+		.form-control:focus {
+			background: #3d3d5c;
+			border-color: #00ffff;
+			box-shadow: 0 0 0 0.2rem rgba(0, 255, 255, 0.25);
+			color: #ffffff;
+		}
+
+		.btn-primary {
+			background: linear-gradient(135deg, #00a8cc 0%, #007bff 100%);
+			border: 1px solid #00a8cc;
+			border-radius: 4px;
+			transition: all 0.3s ease;
+		}
+
+		.btn-primary:hover {
+			background: linear-gradient(135deg, #0097b2 0%, #0069d9 100%);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 8px rgba(0, 168, 204, 0.3);
+		}
+
+		.btn-danger {
+			background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+			border: 1px solid #dc3545;
+			border-radius: 4px;
+			transition: all 0.3s ease;
+		}
+
+		.btn-danger:hover {
+			background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+		}
+
+		.fade {
+			transition: opacity 0.3s ease-in-out;
+		}
+
+		.tab-pane.fade.show.active {
+			animation: fadeIn 0.5s ease-in-out;
+		}
+
+		@keyframes fadeIn {
+			from { opacity: 0; transform: translateY(10px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+	</style>
+{% endblock %}
+
+{% block content %}
+<div class="jumbotron cyber-jumbotron">
+	<div class="container">
+		<h1 class="text-cyber-neon"><i class="fas fa-cogs mr-3"></i>系统配置</h1>
+		<p class="lead text-cyber-secondary">管理您的CTF平台设置和选项</p>
+	</div>
+</div>
+<div class="container-fluid">
+	<div class="row">
+		<!-- 左侧侧边栏 -->
+		<div class="col-md-3">
+			<div class="card cyber-sidebar-card">
+				<div class="card-header cyber-sidebar-header">
+					<h5 class="mb-0 text-cyber-neon"><i class="fas fa-sliders-h mr-2"></i>配置分类</h5>
+				</div>
+				<div class="card-body p-0">
+					<ul id="config-sidebar" class="nav nav-pills flex-column cyber-nav-list">
+
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item active" href="#general" role="tab" data-toggle="tab">
+								<i class="fas fa-gear mr-2"></i>常规设置
+							</a>
+						</li>
+
+						<!-- 外观配置 -->
+						<div class="section-divider">
+							<small class="section-title text-cyber-secondary">外观配置</small>
+						</div>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#logo" role="tab" data-toggle="tab">
+								<i class="fas fa-signature mr-2"></i>Logo设置
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#theme" role="tab" data-toggle="tab">
+								<i class="fas fa-palette mr-2"></i>主题样式
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#localization" role="tab" data-toggle="tab">
+								<i class="fas fa-language mr-2"></i>本地化设置
+							</a>
+						</li>
+
+						<!-- 访问控制 -->
+						<div class="section-divider">
+							<small class="section-title text-cyber-secondary">访问控制</small>
+						</div>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#visibility" role="tab" data-toggle="tab">
+								<i class="fas fa-eye mr-2"></i>可见性设置
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#ctftime" role="tab" data-toggle="tab">
+								<i class="fas fa-clock mr-2"></i>时间控制
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#pause" role="tab" data-toggle="tab">
+								<i class="fas fa-pause mr-2"></i>暂停控制
+							</a>
+						</li>
+
+						<!-- 用户管理 -->
+						<div class="section-divider">
+							<small class="section-title text-cyber-secondary">用户管理</small>
+						</div>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#accounts" role="tab" data-toggle="tab">
+								<i class="fas fa-users mr-2"></i>账户设置
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#brackets" role="tab" data-toggle="tab">
+								<i class="fas fa-chart-line mr-2"></i>排行榜分组
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#fields" role="tab" data-toggle="tab">
+								<i class="fas fa-fingerprint mr-2"></i>自定义字段
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#registration_code" role="tab" data-toggle="tab">
+								<i class="fas fa-key mr-2"></i>注册码管理
+							</a>
+						</li>
+
+						<!-- 题目配置 -->
+						<div class="section-divider">
+							<small class="section-title text-cyber-secondary">题目配置</small>
+						</div>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#challenges" role="tab" data-toggle="tab">
+								<i class="fas fa-puzzle-piece mr-2"></i>题目设置
+							</a>
+						</li>
+
+						<!-- 数据管理 -->
+						<div class="section-divider">
+							<small class="section-title text-cyber-secondary">数据管理</small>
+						</div>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#backup" role="tab" data-toggle="tab">
+								<i class="fas fa-database mr-2"></i>导入与导出
+							</a>
+						</li>
+
+						<!-- 安全设置 -->
+						<div class="section-divider">
+							<small class="section-title text-cyber-secondary">安全设置</small>
+						</div>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#sanitize" role="tab" data-toggle="tab">
+								<i class="fas fa-shield-alt mr-2"></i>数据清理
+							</a>
+						</li>
+
+						<!-- 页面设置 -->
+						<div class="section-divider">
+							<small class="section-title text-cyber-secondary">页面设置</small>
+						</div>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#legal" role="tab" data-toggle="tab">
+								<i class="fas fa-gavel mr-2"></i>法律条款
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#robots" role="tab" data-toggle="tab">
+								<i class="fas fa-robot mr-2"></i>Robots.txt
+							</a>
+						</li>
+						
+						<!-- 集成服务 -->
+						<div class="section-divider">
+							<small class="section-title text-cyber-secondary">集成服务</small>
+						</div>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#email" role="tab" data-toggle="tab">
+								<i class="fas fa-envelope mr-2"></i>邮件通知
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item" href="#social" role="tab" data-toggle="tab">
+								<i class="fas fa-share-alt mr-2"></i>社交分享
+							</a>
+						</li>
+						<li class="nav-item">
+						<a class="nav-link cyber-nav-item" href="#mlc" role="tab" data-toggle="tab">
+							<i class="fas fa-network-wired mr-2"></i>MLC集成
+						</a>
+					</li>
+						
+						<!-- 插件管理 -->
+						{% set plugins = get_configurable_plugins() %}
+						{% if plugins %}
+							<div class="section-divider">
+								<small class="section-title text-cyber-secondary">插件管理</small>
+							</div>
+							{% for plugin in plugins %}
+								{% if plugin.config %}
+									<li class="nav-item">
+										<a class="nav-link cyber-nav-item" href="#plugin_{{loop.index}}" role="tab" data-toggle="tab">
+											<i class="fas fa-puzzle-piece mr-2"></i>{{ plugin.name }}
+										</a>
+									</li>
+								{% elif plugin.route %}
+									<li class="nav-item">
+										<a class="nav-link cyber-nav-item" href="{{ plugin.route }}" target="_blank">
+											<i class="fas fa-puzzle-piece mr-2"></i>{{ plugin.name }} <i class="fas fa-external-link-alt fa-xs"></i>
+										</a>
+									</li>
+								{% endif %}
+							{% endfor %}
+						{% endif %}
+
+						<!-- 危险区域 -->
+						<div class="section-divider danger-divider">
+							<small class="section-title text-cyber-danger">危险区域</small>
+						</div>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item text-cyber-danger" href="#usermode" role="tab" data-toggle="tab">
+								<i class="fas fa-user-cog mr-2"></i>用户模式
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link cyber-nav-item text-cyber-danger" href="{{ url_for('admin.reset') }}" role="tab">
+								<i class="fas fa-trash mr-2"></i>系统重置
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<!-- 右侧内容区域 -->
+		<div class="col-md-9">
+			<!-- 错误提示 -->
+			{% for error in errors %}
+				<div class="alert alert-danger alert-dismissable cyber-alert" role="alert">
+					<span class="sr-only">错误:</span>
+					<i class="fas fa-exclamation-triangle mr-2"></i>{{ error }}
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+			{% endfor %}
+
+			<!-- 配置内容区域 -->
+			<div class="tab-content cyber-tab-content">
+				<!-- 常规设置 -->
+				<div role="tabpanel" class="tab-pane fade show active cyber-config-section" id="general">
+					{% include "admin/configs/general.html" %}
+				</div>
+
+				<!-- 外观配置 -->
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="logo">
+					{% include "admin/configs/logo.html" %}
+				</div>
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="theme">
+					{% include "admin/configs/theme.html" %}
+				</div>
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="localization">
+					{% include "admin/configs/localization.html" %}
+				</div>
+
+				<!-- 访问控制 -->
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="visibility">
+					{% include "admin/configs/visibility.html" %}
+				</div>
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="ctftime">
+					{% include "admin/configs/time.html" %}
+				</div>
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="pause">
+					{% include "admin/configs/pause.html" %}
+				</div>
+
+				<!-- 用户管理 -->
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="accounts">
+					{% include "admin/configs/accounts.html" %}
+				</div>
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="brackets">
+					{% include "admin/configs/brackets.html" %}
+				</div>
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="fields">
+					{% include "admin/configs/fields.html" %}
+				</div>
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="registration_code">
+					{% include "admin/configs/registration_code.html" %}
+				</div>
+
+				<!-- 题目配置 -->
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="challenges">
+					{% include "admin/configs/challenges.html" %}
+				</div>
+
+				<!-- 数据管理 -->
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="backup">
+					{% include "admin/configs/backup.html" %}
+				</div>
+
+				<!-- 安全设置 -->
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="sanitize">
+					{% include "admin/configs/sanitize.html" %}
+				</div>
+
+				<!-- 页面设置 -->
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="legal">
+					{% include "admin/configs/legal.html" %}
+				</div>
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="robots">
+					{% include "admin/configs/robots.html" %}
+				</div>
+
+				<!-- 集成服务 -->
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="email">
+					{% include "admin/configs/email.html" %}
+				</div>
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="social">
+					{% include "admin/configs/social.html" %}
+				</div>
+				<div role="tabpanel" class="tab-pane fade cyber-config-section" id="mlc">
+					{% include "admin/configs/mlc.html" %}
+				</div>
+
+				<!-- 插件管理 -->
+				{% if plugins %}
+					{% for plugin in plugins %}
+						{% if plugin.config %}
+							<div role="tabpanel" class="tab-pane fade cyber-config-section" id="plugin_{{loop.index}}">
+								{% include plugin.config %}
+							</div>
+						{% endif %}
+					{% endfor %}
+				{% endif %}
+
+				<!-- 危险区域 -->
+				<div role="tabpanel" class="tab-pane fade cyber-config-section danger-section" id="usermode">
+					{% include "admin/configs/usermode.html" %}
+				</div>
+				<!-- reset.html is top-level so no need to include -->
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block entrypoint %}
+	{{ Assets.js("assets/js/pages/configs.js", theme="admin") }}
+{% endblock %}

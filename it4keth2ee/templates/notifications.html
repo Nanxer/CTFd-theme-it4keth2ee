@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<!-- 赛博朋克通知头部 -->
+	<div class="cyber-notifications-header">
+		<div class="container">
+			<div class="row align-items-center">
+				<div class="col-md-8">
+					<h1 class="neon-glow">
+						<i class="fas fa-bell me-3"></i>
+						{% trans %}Notifications{% endtrans %}
+					</h1>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="container">
+		{% if not notifications %}
+		<div class="cyber-notifications-empty">
+			<i class="fas fa-bell-slash"></i>
+			<h2>{% trans %}There are no notifications yet{% endtrans %}</h2>
+			<p>{% trans %}Check back later for updates and announcements{% endtrans %}</p>
+		</div>
+		{% endif %}
+		{% for notification in notifications %}
+		<div class="cyber-notification-card">
+			<h3 class="cyber-notification-title">{{ notification.title }}</h3>
+			<div class="cyber-notification-content">
+				{{ notification.html }}
+			</div>
+			<div class="cyber-notification-time">
+				<small><span data-time="{{ notification.date | isoformat }}"></span></small>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ Assets.js("assets/js/notifications.js") }}
+{% endblock %}

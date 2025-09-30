@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  /* 队伍开始页面赛博朋克样式 - 与teams页面完全一致 */
+  .cyber-enrollment-header {
+    background: linear-gradient(135deg, rgba(10, 10, 20, 0.9), rgba(26, 26, 46, 0.9));
+    border-bottom: 2px solid #ff00ff;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cyber-enrollment-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 49%, rgba(255, 0, 255, 0.1) 50%, transparent 51%);
+    background-size: 10px 10px;
+    animation: scanline 2s linear infinite;
+  }
+
+  .cyber-enrollment-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #ff00ff;
+    text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .cyber-enrollment-content {
+    background: rgba(26, 26, 46, 0.8);
+    border: 2px solid #00ffff;
+    border-radius: 10px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cyber-enrollment-welcome {
+    color: #e0e0ff;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .cyber-enrollment-welcome .h2 {
+    color: #00ffff;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 10px #00ffff;
+  }
+
+  .cyber-enrollment-btn {
+    background: linear-gradient(135deg, #ff00ff, #00ffff);
+    border: none;
+    border-radius: 5px;
+    color: #000;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .cyber-enrollment-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 0, 255, 0.4);
+  }
+
+  .cyber-enrollment-btn-outline {
+    background: rgba(20, 20, 40, 0.9);
+    border: 2px solid #00ffff;
+    border-radius: 5px;
+    color: #00ffff;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .cyber-enrollment-btn-outline:hover {
+    background: #00ffff;
+    color: #000;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+  }
+
+  .cyber-enrollment-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ff00ff, transparent);
+    margin: 2rem 0;
+    position: relative;
+  }
+
+  .cyber-enrollment-divider::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 10px;
+    background: #ff00ff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ff00ff;
+  }
+
+  .cyber-enrollment-link {
+    color: #00ffff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .cyber-enrollment-link:hover {
+    color: #ff00ff;
+    text-shadow: 0 0 10px #ff00ff;
+  }
+
+  @keyframes scanline {
+    100% { transform: translateY(100%); }
+  }
+
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .cyber-enrollment-header {
+      padding: 2rem 0;
+    }
+    
+    .cyber-enrollment-header h1 {
+      font-size: 2.5rem;
+    }
+    
+    .cyber-enrollment-content {
+      padding: 1.5rem;
+      margin: 1rem;
+    }
+    
+    .cyber-enrollment-welcome .h2 {
+      font-size: 1.8rem;
+    }
+  }
+</style>
+
+<div class="cyber-enrollment-header">
+  <div class="container">
+    <h1 class="text-center">{% trans %}队伍{% endtrans %}</h1>
+  </div>
+</div>
+
+<div class="container">
+  <div class="cyber-enrollment-content">
+    <div class="cyber-enrollment-welcome">
+      <div class="h2">{% trans %}欢迎来到{% endtrans %} {{ Configs.ctf_name }}!</div>
+      <p>{% trans %}为了参与比赛，您必须加入或创建一个队伍。{% endtrans %}</p>
+    </div>
+
+    {% if integrations.mlc() %}
+      <div class="row">
+        <div class="col-md-8 offset-md-2 text-center">
+          <a class="cyber-enrollment-btn" href="{{ url_for('auth.oauth_login') }}">
+            <i class="fas fa-shield-alt me-2"></i>
+            {% trans %}使用官方队伍参赛{% endtrans %}
+          </a>
+        </div>
+      </div>
+      
+      <div class="cyber-enrollment-divider"></div>
+      
+      <div class="row">
+        <div class="col-md-6 text-center">
+          <a class="cyber-enrollment-btn-outline" href="{{ url_for('teams.join') }}">
+            <i class="fas fa-user-plus me-2"></i>
+            {% trans %}加入非官方队伍{% endtrans %}
+          </a>
+        </div>
+        <div class="col-md-6 text-center">
+          <a class="cyber-enrollment-btn-outline" href="{{ url_for('teams.new') }}">
+            <i class="fas fa-plus-circle me-2"></i>
+            {% trans %}创建非官方队伍{% endtrans %}
+          </a>
+        </div>
+      </div>
+    {% else %}
+      <div class="row">
+        <div class="col-md-6 text-center">
+          <a class="cyber-enrollment-btn" href="{{ url_for('teams.join') }}">
+            <i class="fas fa-user-plus me-2"></i>
+            {% trans %}加入队伍{% endtrans %}
+          </a>
+        </div>
+        <div class="col-md-6 text-center">
+          <a class="cyber-enrollment-btn" href="{{ url_for('teams.new') }}">
+            <i class="fas fa-plus-circle me-2"></i>
+            {% trans %}创建队伍{% endtrans %}
+          </a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

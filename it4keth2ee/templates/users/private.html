@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="cyber-content-container cyber-bg">
+  <!-- 用户信息卡片 -->
+  <div class="row">
+    <div class="col-12">
+      <div class="cyber-card user-profile-card">
+        <!-- 用户头像和基本信息区域 -->
+        <div class="cyber-header-section">
+          <div class="cyber-avatar-container">
+            <div class="cyber-avatar">
+              <i class="fas fa-user-secret fa-4x"></i>
+              <div class="cyber-glow"></div>
+            </div>
+          </div>
+          
+          <div class="cyber-user-info">
+            <h1 class="cyber-title">{{ user.name }}</h1>
+            
+            {% if user.team_id %}
+              <div class="cyber-team-badge">
+                <a href="{{ url_for('teams.public', team_id=user.team_id) }}" class="cyber-link">
+                  <span class="cyber-badge">
+                    <i class="fas fa-users"></i>
+                    {{ user.team.name }}
+                  </span>
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- 用户标签区域 -->
+        <div class="cyber-tags-section">
+          {% if user.oauth_id %}
+            <a href="https://majorleaguecyber.org/u/{{ user.name }}" class="cyber-tag official">
+              <i class="fas fa-shield-alt"></i>
+              {% trans %}Official{% endtrans %}
+            </a>
+          {% endif %}
+
+          {% if user.affiliation %}
+            <span class="cyber-tag affiliation">
+              <i class="fas fa-building"></i>
+              {{ user.affiliation }}
+            </span>
+          {% endif %}
+
+          {% if user.country %}
+            <span class="cyber-tag country">
+              <i class="flag-{{ user.country.lower() }}"></i>
+              {{ lookup_country_code(user.country) }}
+            </span>
+          {% endif %}
+
+          {% if user.bracket_id %}
+            <span class="cyber-tag bracket">
+              <i class="fas fa-trophy"></i>
+              {{ user.bracket.name }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- 自定义字段区域 -->
+        {% if user.fields %}
+          <div class="cyber-fields-section">
+            {% for field in user.fields %}
+              <div class="cyber-field-item">
+                <span class="cyber-field-name">{{ field.name }}:</span>
+                <span class="cyber-field-value">{{ field.value }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <!-- 统计信息区域 -->
+        <div class="cyber-stats-section">
+          <div class="cyber-stat-item">
+            <div class="cyber-stat-value">
+              {% if account.place %}
+                {{ account.place }}
+              {% else %}
+                - 
+              {% endif %}
+            </div>
+            <div class="cyber-stat-label">排名</div>
+          </div>
+          
+          <div class="cyber-stat-item">
+            <div class="cyber-stat-value">
+              {% if account %}
+                {{ account.get_score(admin=True) }}
+              {% else %}
+                0
+              {% endif %}
+            </div>
+            <div class="cyber-stat-label">积分</div>
+          </div>
+        </div>
+
+        <!-- 网站链接 -->
+        {% if user.website %}
+          <div class="cyber-website-section">
+            <a href="{{ user.website }}" target="_blank" class="cyber-website-link" rel="noopener">
+              <i class="fas fa-external-link-alt"></i>
+              {{ user.website }}
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <!-- 成就和解题记录区域 -->
+  <div class="row mt-4">
+    <div class="col-12">
+      {% include "components/errors.html" %}
+
+      {% set solves = user.solves %}
+      {% set awards = user.awards %}
+
+      {% if solves or awards %}
+        <!-- 成就展示 -->
+        {% if awards %}
+          <div class="cyber-card awards-section">
+            <div class="cyber-section-header">
+              <h3 class="cyber-section-title">
+                <i class="fas fa-trophy"></i>
+                {% trans %}Awards{% endtrans %}
+              </h3>
+            </div>
+            
+            <div class="cyber-awards-grid">
+              {% for award in awards %}
+                <div class="cyber-award-item">
+                  <div class="cyber-award-icon">
+                    <i class="award-icon award-{{ award.icon }} fa-3x"></i>
+                    <div class="cyber-award-glow"></div>
+                  </div>
+                  <div class="cyber-award-info">
+                    <h4 class="cyber-award-name">{{ award.name }}</h4>
+                    {% if award.category %}
+                      <p class="cyber-award-category">{{ award.category }}</p>
+                    {% endif %}
+                    {% if award.description %}
+                      <p class="cyber-award-description">{{ award.description }}</p>
+                    {% endif %}
+                    <div class="cyber-award-value">{{ award.value }} 积分</div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- 解题记录 -->
+        <div class="cyber-card solves-section">
+          <div class="cyber-section-header">
+            <h3 class="cyber-section-title">
+              <i class="fas fa-flag-checkered"></i>
+              {% trans %}Solves{% endtrans %}
+            </h3>
+          </div>
+          
+          <div class="cyber-table-container">
+            <table class="cyber-table">
+              <thead>
+                <tr>
+                  <th class="cyber-table-header">{% trans %}Challenge{% endtrans %}</th>
+                  <th class="cyber-table-header d-none d-md-table-cell">{% trans %}Category{% endtrans %}</th>
+                  <th class="cyber-table-header">{% trans %}Value{% endtrans %}</th>
+                  <th class="cyber-table-header">{% trans %}Time{% endtrans %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for solve in solves %}
+                  <tr class="cyber-table-row">
+                    <td class="cyber-table-cell">
+                      <a href="{{ url_for('challenges.listing') }}#{{ solve.challenge.name }}-{{ solve.challenge.id }}" class="cyber-link">
+                        <i class="fas fa-flag"></i>
+                        {{ solve.challenge.name }}
+                      </a>
+                    </td>
+                    <td class="cyber-table-cell d-none d-md-table-cell">
+                      <span class="cyber-category-badge">{{ solve.challenge.category }}</span>
+                    </td>
+                    <td class="cyber-table-cell">
+                      <span class="cyber-points">{{ solve.challenge.value }}</span>
+                    </td>
+                    <td class="cyber-table-cell">
+                      <span class="cyber-time" data-time="{{ solve.date | isoformat }}"></span>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 统计图表 -->
+        <div class="cyber-card stats-section" x-data="UserGraphs">
+          <div class="cyber-section-header">
+            <h3 class="cyber-section-title">
+              <i class="fas fa-chart-bar"></i>
+              统计概览
+            </h3>
+          </div>
+          
+          <div class="cyber-stats-grid">
+            <!-- 解题成功率 -->
+            <div class="cyber-stat-card">
+              <h4 class="cyber-stat-title">解题成功率</h4>
+              <div class="cyber-progress-container">
+                <div class="cyber-progress-bar">
+                  <div 
+                    class="cyber-progress-fill success" 
+                    :style="{ width: `${getSolvePercentage()}%` }"
+                  ></div>
+                  <div 
+                    class="cyber-progress-fill fail" 
+                    :style="{ width: `${getFailPercentage()}%` }"
+                  ></div>
+                </div>
+                <div class="cyber-progress-labels">
+                  <span class="cyber-progress-label success">
+                    <i class="fas fa-check-circle"></i>
+                    <span x-text="`成功 (${getSolvePercentage()}%)`"></span>
+                  </span>
+                  <span class="cyber-progress-label fail">
+                    <i class="fas fa-times-circle"></i>
+                    <span x-text="`失败 (${getFailPercentage()}%)`"></span>
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 分类分布 -->
+            <div class="cyber-stat-card">
+              <h4 class="cyber-stat-title">分类分布</h4>
+              <div class="cyber-progress-container">
+                <div class="cyber-progress-bar">
+                  <template x-for="category in getCategoryBreakdown()" :key="category.name">
+                    <div 
+                      class="cyber-progress-fill" 
+                      :style="{ width: `${category.percent}%`, 'background-color': category.color }"
+                    ></div>
+                  </template>
+                </div>
+                <div class="cyber-progress-labels">
+                  <template x-for="category in getCategoryBreakdown()" :key="category.name">
+                    <span class="cyber-progress-label">
+                      <i class="fas fa-circle" :style="{ color: category.color }"></i>
+                      <span x-text="`${category.name} (${category.percent}%)`"></span>
+                    </span>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 积分图表 -->
+          <div class="cyber-graph-section">
+            <div id="score-graph" x-ref="scoregraph" class="cyber-graph-container">
+              <div class="cyber-graph-loading">
+                <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+                <span>加载积分图表...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <!-- 无解题记录 -->
+        <div class="cyber-card no-solves-section">
+          <div class="cyber-empty-state">
+            <i class="fas fa-flag fa-4x"></i>
+            <h3 class="cyber-empty-title">{% trans %}No solves yet{% endtrans %}</h3>
+            <p class="cyber-empty-description">开始挑战，获取你的第一个积分！</p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ Assets.js("assets/js/users/private.js") }}
+{% endblock %}

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>管理面板</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" href="{{ url_for('views.themes', theme='admin', path='img/favicon.ico') }}" type="image/x-icon">
+	<link rel="icon" href="{{ url_for('views.themes', theme='admin', path='img/favicon.ico') }}" type="image/x-icon">
+	{{ Assets.css("assets/css/main.scss", theme="admin") }}
+	{{ Assets.css("assets/css/fonts.scss", theme="admin") }}
+	{{ Assets.css("assets/css/admin.scss", theme="admin") }}
+	{{ Assets.css("assets/css/codemirror.scss", theme="admin") }}
+	<script type="text/javascript">
+		var init = {
+			'urlRoot': "{{ request.script_root }}",
+			'csrfNonce': "{{ Session.nonce }}",
+			'userMode': "{{ Configs.user_mode }}",
+			'userId': {{ Session.id }},
+			'userName': {{ User.name | tojson }},
+			'userEmail': {{ User.email | tojson }},
+			'teamId': {{ Team.id | tojson }}, 
+			'teamName': {{ Team.name | tojson }},
+			'start': {{ Configs.start | tojson }},
+			'end': {{ Configs.end | tojson }}
+		}
+	</script>
+	{% block stylesheets %} {% endblock %}
+	{% for stylesheet in get_registered_admin_stylesheets() %}
+		{% if stylesheet.startswith('http') %}
+			<link rel="stylesheet" type="text/css" href="{{ stylesheet }}">
+		{% elif request.script_root %}
+			<link rel="stylesheet" type="text/css" href="{{ request.script_root }}/{{ stylesheet }}">
+		{% else %}
+			<link rel="stylesheet" type="text/css" href="{{ stylesheet }}">
+		{% endif %}
+	{% endfor %}
+</head>
+
+<body>
+	<div class="sidebar-wrapper">
+		<nav class="sidebar-nav">
+			<div class="sidebar-header">
+				<a href="{{ url_for('views.static_html', route='/') }}" class="sidebar-brand">it4keth2ee</a>
+			</div>
+			<ul class="sidebar-nav-list">
+				<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.statistics') }}"><i class="fas fa-chart-bar"></i> 统计</a></li>
+				<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.notifications') }}"><i class="fas fa-bell"></i> 通知</a></li>
+				<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.scoreboard_listing') }}"><i class="fas fa-trophy"></i> 排行榜</a></li>
+				<li class="nav-item dropdown">
+					<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"><i class="fas fa-puzzle-piece"></i> 题目</a>
+					<ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="{{ url_for('admin.challenges_listing') }}">题目列表</a></li>
+						<li><a class="dropdown-item" href="{{ url_for('admin.challenges_new') }}">新建题目</a></li>
+					</ul>
+				</li>
+				<li class="nav-item dropdown">
+					<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"><i class="fas fa-users"></i> 用户</a>
+					<ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="{{ url_for('admin.users_listing') }}">用户列表</a></li>
+						<li><a class="dropdown-item" href="{{ url_for('admin.users_new') }}">新建用户</a></li>
+					</ul>
+				</li>
+				{% if get_config('user_mode') == 'teams' %}
+				<li class="nav-item dropdown">
+					<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"><i class="fas fa-user-friends"></i> 团队</a>
+					<ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="{{ url_for('admin.teams_listing') }}">团队列表</a></li>
+						<li><a class="dropdown-item" href="{{ url_for('admin.teams_new') }}">新建团队</a></li>
+					</ul>
+				</li>
+				{% endif %}
+				<li class="nav-item dropdown">
+					<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"><i class="fas fa-paper-plane"></i> 提交</a>
+					<ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="{{ url_for('admin.submissions_listing') }}">所有提交</a></li>
+						<li><a class="dropdown-item" href="{{ url_for('admin.submissions_listing', submission_type='correct') }}">正确提交</a></li>
+						<li><a class="dropdown-item" href="{{ url_for('admin.submissions_listing', submission_type='incorrect') }}">错误提交</a></li>
+					</ul>
+				</li>
+				<li class="nav-item dropdown">
+					<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"><i class="fas fa-file"></i> 页面</a>
+					<ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="{{ url_for('admin.pages_listing') }}">所有页面</a></li>
+						<li><a class="dropdown-item" href="{{ url_for('admin.pages_new') }}">新建页面</a></li>
+					</ul>
+				</li>
+				<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.config') }}"><i class="fas fa-cog"></i> 配置</a></li>
+
+				{% set plugin_menu = get_admin_plugin_menu_bar() %}
+				{% set plugins = get_menubar_plugins() %}
+				{% if plugin_menu or plugins %}
+					<li class="nav-divider"><span>插件</span></li>
+					{% for menu in plugin_menu %}
+						{% if request.script_root %}
+							{% set route = '/' + request.script_root + '/' + menu.route %}
+						{% else %}
+							{% set route = menu.route %}
+						{% endif %}
+						<li class="nav-item">
+							<a class="nav-link" href="{{ route }}" {% if menu.link_target %}target="{{ menu.link_target }}"{% endif %}>
+								{{ menu.title }}
+							</a>
+						</li>
+					{% endfor %}
+
+					{% if plugins %}
+					<li class="nav-item dropdown">
+						<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">插件</a>
+						<ul class="dropdown-menu">
+							{% for plugin in plugins %}
+								<li><a class="dropdown-item" href="{{ request.script_root }}{{ plugin.route }}">{{ plugin.name }}</a></li>
+							{% endfor %}
+						</ul>
+					</li>
+					{% endif %}
+				{% endif %}
+				<li class="nav-item">
+					<a class="nav-link" href="https://docs.ctfd.io/" target="_blank">
+						<i class="far fa-question-circle"></i> 帮助文档
+					</a>
+				</li>
+			</ul>
+		</nav>
+	</div>
+
+	<main role="main">
+		{% block content %}
+		{% endblock %}
+	</main>
+
+	
+	</footer>
+
+	{% block entrypoint %}
+		{{ Assets.js("assets/js/pages/main.js", theme="admin") }}
+	{% endblock %}
+
+	{% block scripts %} {% endblock %}
+
+	{% for script in get_registered_admin_scripts() %}
+		{% if script.startswith('http') %}
+			<script defer src="{{ script }}"></script>
+		{% elif request.script_root %}
+			<script defer src="{{ request.script_root }}/{{ script }}"></script>
+		{% else %}
+			<script defer src="{{ script }}"></script>
+		{% endif %}
+	{% endfor %}
+</body>
+
+</html>

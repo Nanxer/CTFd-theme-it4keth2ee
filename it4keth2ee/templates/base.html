@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="cyberpunk-theme">
+<head>
+  <!-- 元数据定义 -->
+  <title>{{ title or Configs.ctf_name }}</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a14">
+  <link rel="shortcut icon" href="{{ Configs.ctf_small_icon }}" type="image/x-icon">
+
+  {{ meta | safe }}
+
+  <!-- 样式表加载 -->
+  {% block stylesheets %}
+    {{ Assets.css("assets/scss/main.scss") }}
+  {% endblock %}
+
+  {{ Plugins.styles }}
+
+  <!-- JavaScript 资源 -->
+  {{ Assets.js("assets/js/color_mode_switcher.js", type=None) }}
+
+  <!-- 全局初始化配置 -->
+  <script type="text/javascript">
+    window.init = {
+      'urlRoot': "{{ request.script_root }}",
+      'csrfNonce': "{{ Session.nonce }}",
+      'userMode': "{{ Configs.user_mode }}",
+      'userId': {{ Session.id }},
+      'userName': {{ User.name | tojson }},
+      'userEmail': {{ User.email | tojson }},
+      'userVerified': {{ User.verified | tojson }},
+      'teamId': {{ Team.id | tojson }},
+      'teamName': {{ Team.name | tojson }},
+      'start': {{ Configs.start | tojson }},
+      'end': {{ Configs.end | tojson }},
+      'themeSettings': {{ Configs.theme_settings | tojson }},
+      'eventSounds': [
+        "/themes/core/static/sounds/notification.webm",
+        "/themes/core/static/sounds/notification.mp3",
+      ],
+    }
+  </script>
+
+  {{ Configs.theme_header }}
+
+  <!-- 赛博朋克主题内联样式 -->
+  <style>
+    /* ===== 全局样式定义 ===== */
+    :root {
+      --cyber-primary: #00ffff;
+      --cyber-secondary: #ff00ff;
+      --cyber-accent: #00ff88;
+      --cyber-bg-dark: #0a0a14;
+      --cyber-bg-medium: #1a1a2e;
+      --cyber-bg-light: #16213e;
+      --cyber-text: #e0e0ff;
+      --cyber-text-muted: #a0a0c0;
+      --cyber-glow-primary: 0 0 10px var(--cyber-primary);
+      --cyber-glow-secondary: 0 0 10px var(--cyber-secondary);
+      --cyber-glow-accent: 0 0 10px var(--cyber-accent);
+    }
+
+    /* 全局赛博朋克样式 */
+    body {
+      background: linear-gradient(135deg, var(--cyber-bg-dark) 0%, var(--cyber-bg-medium) 50%, var(--cyber-bg-light) 100%);
+      background-attachment: fixed;
+      color: var(--cyber-text);
+      font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* 赛博朋克背景网格 */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: -2;
+      opacity: 0.3;
+      animation: gridMove 30s linear infinite;
+    }
+
+    /* 赛博朋克扫描线效果 */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 255, 255, 0.03) 3px,
+        rgba(0, 255, 255, 0.08) 4px,
+        rgba(0, 255, 255, 0.03) 5px,
+        transparent 6px
+      );
+      background-size: 100% 6px;
+      z-index: -1;
+      pointer-events: none;
+      /* animation: scanline 6s linear infinite; */
+    }
+
+    /* 主内容区域样式 */
+    main {
+      min-height: calc(100vh - 200px);
+      padding-top: 0;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    /* 标题样式优化 */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-weight: 600;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      letter-spacing: 0.5px;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+      main {
+        padding-top: 70px;
+        min-height: auto;
+      }
+    }
+
+    /* 动画定义 */
+    @keyframes scanline {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    /* 滚动条美化 */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--cyber-bg-dark);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--cyber-primary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--cyber-secondary);
+      box-shadow: var(--cyber-glow-secondary);
+    }
+  </style>
+</head>
+<body>
+  <!-- 导航栏组件 -->
+  {% include "components/navbar.html" %}
+
+  <!-- 主内容区域 -->
+  <main role="main" class="cyber-main">
+    {% block content %}
+    {% endblock %}
+  </main>
+
+  <!-- 底部组件 -->
+  {% include "components/snackbar.html" %}
+  {% include "components/notifications.html" %}
+
+  <!-- 脚本资源 -->
+  {% block scripts %}
+    {{ Assets.js("assets/js/page.js") }}
+  {% endblock %}
+
+  {{ Plugins.scripts }}
+  {{ Configs.theme_footer }}
+
+  <!-- 赛博朋克装饰元素 -->
+  <div class="cyber-decoration">
+    <div class="cyber-pulse-dots"></div>
+    <div class="cyber-data-stream"></div>
+    <div class="cyber-grid-lines"></div>
+  </div>
+
+  <!-- 赛博朋克主题脚本 -->
+  <script>
+    /**
+     * 赛博朋克主题初始化
+     * 负责页面加载动画和装饰元素效果
+     */
+    document.addEventListener('DOMContentLoaded', function() {
+      // 页面加载淡入效果
+      initPageLoadAnimation();
+      
+      // 初始化页面切换动画
+      initPageTransitions();
+      
+      // 初始化装饰元素
+      initCyberDecorations();
+    });
+
+    /**
+     * 页面加载动画初始化
+     */
+    function initPageLoadAnimation() {
+      // 检查是否是页面切换后的加载
+      const isPageTransition = sessionStorage.getItem('cyber-page-transition');
+      
+      if (isPageTransition) {
+        // 页面切换后的加载，使用更快的动画
+        document.body.style.opacity = '0';
+        document.body.style.transition = 'opacity 0.3s ease';
+        
+        setTimeout(() => {
+          document.body.style.opacity = '1';
+          
+          // 清理标记
+          sessionStorage.removeItem('cyber-page-transition');
+        }, 50);
+      } else {
+        // 首次加载，使用完整的动画
+        document.body.classList.add('page-loading');
+        document.body.style.opacity = '0';
+        
+        setTimeout(() => {
+          document.body.style.transition = 'opacity 0.4s ease';
+          document.body.style.opacity = '1';
+          
+          // 添加页面加载完成类
+          setTimeout(() => {
+            document.body.classList.add('page-loaded');
+            document.body.classList.remove('page-loading');
+          }, 400);
+        }, 100);
+      }
+    }
+
+    /**
+     * 页面切换动画初始化
+     */
+    function initPageTransitions() {
+      // 创建页面加载指示器
+      createPageLoader();
+      
+      // 拦截所有导航链接点击事件
+      document.addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        if (link && link.href && link.href.startsWith(window.location.origin) && 
+            !link.href.includes('#') && !link.getAttribute('target')) {
+          e.preventDefault();
+          
+          // 添加点击反馈动画
+          addLinkClickAnimation(link);
+          
+          // 执行页面切换动画
+          performPageTransition(link.href);
+        }
+      });
+    }
+
+    /**
+     * 创建页面加载指示器
+     */
+    function createPageLoader() {
+      const loader = document.createElement('div');
+      loader.className = 'cyber-page-loader';
+      document.body.appendChild(loader);
+      
+      const overlay = document.createElement('div');
+      overlay.className = 'cyber-page-overlay';
+      document.body.appendChild(overlay);
+    }
+
+    /**
+     * 添加链接点击动画
+     */
+    function addLinkClickAnimation(link) {
+      if (link.classList.contains('cyber-menu-link') || link.classList.contains('cyber-nav-link')) {
+        link.style.transform = 'translateX(10px)';
+        setTimeout(() => {
+          link.style.transform = '';
+        }, 300);
+      }
+    }
+
+    /**
+     * 执行页面切换动画
+     */
+    function performPageTransition(url) {
+      // 设置页面切换标记
+      sessionStorage.setItem('cyber-page-transition', 'true');
+      
+      // 直接跳转，不使用动画
+      window.location.href = url;
+    }
+
+    /**
+     * 赛博朋克装饰元素初始化
+     */
+    function initCyberDecorations() {
+      initPulseDots();
+      initDataStream();
+    }
+
+    /**
+     * 脉冲点动画初始化
+     */
+    function initPulseDots() {
+      const pulseDots = document.querySelector('.cyber-pulse-dots');
+      if (!pulseDots) return;
+
+      // 创建脉冲点
+      for (let i = 0; i < 25; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'cyber-pulse-dot';
+        dot.style.left = Math.random() * 100 + '%';
+        dot.style.top = Math.random() * 100 + '%';
+        dot.style.animationDelay = Math.random() * 6 + 's';
+        dot.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        pulseDots.appendChild(dot);
+      }
+    }
+
+    /**
+     * 数据流动画初始化
+     */
+    function initDataStream() {
+      const dataStream = document.querySelector('.cyber-data-stream');
+      if (!dataStream) return;
+
+      // 数据流生成器
+      setInterval(() => {
+        const streamItem = createDataStreamItem();
+        dataStream.appendChild(streamItem);
+        
+        // 自动清理
+        setTimeout(() => {
+          if (streamItem.parentNode === dataStream) {
+            dataStream.removeChild(streamItem);
+          }
+        }, 6000);
+      }, 800);
+    }
+
+    /**
+     * 创建数据流项目
+     */
+    function createDataStreamItem() {
+      const stream = document.createElement('div');
+      stream.className = 'cyber-data-item';
+      stream.style.left = Math.random() * 100 + '%';
+      stream.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      stream.textContent = generateCyberText();
+      return stream;
+    }
+
+    /**
+     * 生成赛博朋克风格文本
+     */
+    function generateCyberText() {
+      const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const length = Math.floor(Math.random() * 4) + 4;
+      let result = '';
+      
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      
+      return result;
+    }
+  </script>
+
+  <!-- 赛博朋克装饰元素样式 -->
+  <style>
+    /* ===== 装饰元素样式 ===== */
+    .cyber-decoration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    /* 脉冲点样式 */
+    .cyber-pulse-dots {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .cyber-pulse-dot {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: var(--cyber-primary);
+      border-radius: 50%;
+      animation: cyberPulse 4s infinite ease-in-out;
+      box-shadow: var(--cyber-glow-primary);
+      opacity: 0.7;
+    }
+
+    @keyframes cyberPulse {
+      0%, 100% { 
+        opacity: 0.3; 
+        transform: scale(0.8); 
+      }
+      50% { 
+        opacity: 1; 
+        transform: scale(1.2); 
+      }
+    }
+
+    /* 数据流样式 */
+    .cyber-data-stream {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .cyber-data-item {
+      position: absolute;
+      color: var(--cyber-accent);
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      animation: dataFall linear forwards;
+      text-shadow: var(--cyber-glow-accent);
+      opacity: 0.8;
+      letter-spacing: 1px;
+    }
+
+    @keyframes dataFall {
+      0% { 
+        transform: translateY(-150px); 
+        opacity: 0; 
+      }
+      10% { 
+        opacity: 0.8; 
+      }
+      90% { 
+        opacity: 0.8; 
+      }
+      100% { 
+        transform: translateY(100vh); 
+        opacity: 0; 
+      }
+    }
+
+    /* 网格线样式 */
+    .cyber-grid-lines {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(90deg, rgba(0, 255, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(rgba(0, 255, 255, 0.08) 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: gridMove 25s linear infinite;
+      opacity: 0.4;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(40px, 40px); }
+    }
+
+    /* 性能优化 */
+    @media (prefers-reduced-motion: reduce) {
+      .cyber-pulse-dot,
+      .cyber-data-item,
+      .cyber-grid-lines,
+      body::before,
+      body::after {
+        animation: none !important;
+      }
+    }
+
+    /* 高对比度模式支持 */
+    @media (prefers-contrast: high) {
+      :root {
+        --cyber-primary: #00ffff;
+        --cyber-secondary: #ff00ff;
+        --cyber-accent: #00ff00;
+      }
+    }
+
+    /* 深色模式优化 */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --cyber-bg-dark: #050510;
+        --cyber-bg-medium: #101020;
+        --cyber-bg-light: #151530;
+      }
+    }
+
+    /* ===== 用户页面专用样式 ===== */
+    .cyber-card {
+      background: linear-gradient(135deg, rgba(26, 26, 46, 0.9), rgba(16, 16, 32, 0.9));
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(0, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cyber-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .cyber-card:hover::before {
+      left: 100%;
+    }
+
+    .user-profile-card {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.05), rgba(255, 0, 255, 0.05));
+      border: 2px solid rgba(0, 255, 255, 0.5);
+      box-shadow: 
+        0 0 30px rgba(0, 255, 255, 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .cyber-header-section {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .cyber-avatar-container {
+      position: relative;
+    }
+
+    .cyber-avatar {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, var(--cyber-primary), var(--cyber-secondary));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cyber-glow {
+      position: absolute;
+      right: 10%;
+      background: conic-gradient(var(--cyber-primary));
+    }
+
+    @keyframes rotateGlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .cyber-user-info {
+      flex: 1;
+    }
+
+    .cyber-title {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--cyber-primary), var(--cyber-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    }
+
+    .cyber-team-badge {
+      margin-top: 1rem;
+    }
+
+    .cyber-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(0, 255, 255, 0.1);
+      border: 1px solid var(--cyber-primary);
+      border-radius: 20px;
+      padding: 0.5rem 1rem;
+      color: var(--cyber-primary);
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .cyber-badge:hover {
+      background: rgba(0, 255, 255, 0.2);
+      box-shadow: var(--cyber-glow-primary);
+      transform: translateY(-2px);
+    }
+
+    .cyber-tags-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .cyber-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 0, 255, 0.1);
+      border: 1px solid var(--cyber-secondary);
+      border-radius: 15px;
+      padding: 0.4rem 1rem;
+      color: var(--cyber-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .cyber-tag:hover {
+      background: rgba(255, 0, 255, 0.2);
+      box-shadow: var(--cyber-glow-secondary);
+      transform: translateY(-1px);
+    }
+
+    .cyber-fields-section {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .cyber-field-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: rgba(0, 255, 255, 0.05);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 8px;
+    }
+
+    .cyber-field-name {
+      font-weight: 600;
+      color: var(--cyber-primary);
+    }
+
+    .cyber-field-value {
+      color: var(--cyber-text);
+    }
+
+    .cyber-stats-section {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .cyber-stat-item {
+      text-align: center;
+      flex: 1;
+    }
+
+    .cyber-stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--cyber-primary), var(--cyber-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .cyber-stat-label {
+      color: var(--cyber-text-muted);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cyber-website-section {
+      text-align: center;
+    }
+
+    .cyber-website-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--cyber-accent) !important;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+    }
+
+    .cyber-website-link:hover {
+      color: var(--cyber-primary) !important;
+      text-shadow: var(--cyber-glow-primary);
+      transform: translateY(-1px);
+    }
+
+    .cyber-section-header {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .cyber-section-title {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--cyber-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .cyber-awards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .cyber-award-item {
+      background: rgba(0, 255, 255, 0.05);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cyber-award-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+    }
+
+    .cyber-award-icon {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+
+    .cyber-award-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.3), transparent 70%);
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+    }
+
+    .cyber-award-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--cyber-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .cyber-award-category {
+      color: var(--cyber-secondary);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .cyber-award-description {
+      color: var(--cyber-text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .cyber-award-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--cyber-accent);
+    }
+
+    .cyber-table-container {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 255, 255, 0.3);
+    }
+
+    .cyber-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(16, 16, 32, 0.8);
+    }
+
+    .cyber-table-header {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+      color: var(--cyber-primary);
+      padding: 1rem;
+      font-weight: 600;
+      text-align: left;
+      border-bottom: 2px solid var(--cyber-primary);
+    }
+
+    .cyber-table-row {
+      transition: all 0.3s ease;
+      border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+    }
+
+    .cyber-table-row:hover {
+      background: rgba(0, 255, 255, 0.05);
+    }
+
+    .cyber-table-cell {
+      padding: 1rem;
+      color: var(--cyber-text);
+    }
+
+    .cyber-link {
+      color: var(--cyber-accent) !important;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .cyber-link:hover {
+      color: var(--cyber-primary) !important;
+      text-shadow: var(--cyber-glow-primary);
+    }
+
+    .cyber-category-badge {
+      background: rgba(255, 0, 255, 0.1);
+      color: var(--cyber-secondary);
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .cyber-points {
+      font-weight: 600;
+      color: var(--cyber-accent);
+    }
+
+    .cyber-time {
+      color: var(--cyber-text-muted);
+      font-family: 'Courier New', monospace;
+    }
+
+    .cyber-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .cyber-stat-card {
+      background: rgba(0, 255, 255, 0.05);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+
+    .cyber-stat-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--cyber-primary);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .cyber-progress-container {
+      margin-top: 1rem;
+    }
+
+    .cyber-progress-bar {
+      height: 8px;
+      background: rgba(0, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .cyber-progress-fill {
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transition: width 0.5s ease;
+    }
+
+    .cyber-progress-fill.success {
+      background: linear-gradient(90deg, var(--cyber-accent), #00ff88);
+    }
+
+    .cyber-progress-fill.fail {
+      background: linear-gradient(90deg, #ff4444, #ff0066);
+    }
+
+    .cyber-progress-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      gap: 1rem;
+    }
+
+    .cyber-progress-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--cyber-text-muted);
+    }
+
+    .cyber-progress-label.success {
+      color: var(--cyber-accent);
+    }
+
+    .cyber-progress-label.fail {
+      color: #ff4444;
+    }
+
+    .cyber-graph-section {
+      margin-top: 2rem;
+    }
+
+    .cyber-graph-container {
+      background: rgba(0, 255, 255, 0.05);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      border-radius: 10px;
+      padding: 2rem;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cyber-graph-loading {
+      text-align: center;
+      color: var(--cyber-text-muted);
+    }
+
+    .cyber-empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+
+    .cyber-empty-title {
+      font-size: 1.5rem;
+      color: var(--cyber-text-muted);
+      margin: 1rem 0 0.5rem;
+    }
+
+    .cyber-empty-description {
+      color: var(--cyber-text-muted);
+      font-size: 1rem;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .cyber-header-section {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+      }
+
+      .cyber-title {
+        font-size: 2rem;
+      }
+
+      .cyber-stats-section {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .cyber-stat-value {
+        font-size: 2rem;
+      }
+
+      .cyber-awards-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cyber-stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cyber-table-container {
+        font-size: 0.9rem;
+      }
+
+      .cyber-table-cell {
+        padding: 0.8rem 0.5rem;
+      }
+    }
+  </style>
+</body>
+</html>

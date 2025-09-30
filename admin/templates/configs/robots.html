@@ -1,0 +1,14 @@
+<div role="tabpanel" class="tab-pane config-section" id="robots">
+	<form method="POST" enctype="multipart/form-data">
+		<div class="form-group">
+			<label>
+				Robots.txt配置
+				<small class="form-text text-muted">
+					<code>robots.txt</code> 文件包含指示，建议机器人哪些网页可以访问，哪些不应访问。并非所有机器人都遵守 <code>robots.txt</code>。
+				</small>
+			</label>
+			<textarea class="form-control" id="theme-footer" name="robots_txt" rows="7">{{ robots_txt or "User-agent: *\nDisallow: /admin\n" }}</textarea>
+		</div>
+		<button type="submit" class="btn btn-md btn-primary float-right">更新</button>
+	</form>
+</div>

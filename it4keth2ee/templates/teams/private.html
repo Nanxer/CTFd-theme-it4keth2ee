@@ -1,0 +1,606 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div id="team-edit-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1050; background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog modal-lg" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-action text-center w-100">{% trans %}Edit Team{% endtrans %}</h2>
+          <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+
+        <div class="modal-body clearfix" x-data="TeamEditModal">
+          {% with form = Forms.teams.TeamSettingsForm(obj=team) %}
+            {% from "macros/forms.html" import render_extra_fields %}
+            <form id="team-info-form" method="POST" @submit.prevent="updateProfile()">
+
+              <div class="mb-2">
+                <b>{{ form.name.label(clas="mb-2") }}</b>
+                {{ form.name(class="form-control") }}
+                <small class="form-text text-muted">
+                  {{ form.name.description }}
+                </small>
+              </div>
+
+              <div class="mb-2">
+                <b>{{ form.password.label(clas="mb-2") }}</b>
+                {{ form.password(class="form-control") }}
+                <small class="form-text text-muted">
+                  {{ form.password.description }}
+                </small>
+              </div>
+
+              <div class="mb-2">
+                <b>{{ form.confirm.label(clas="mb-2") }}</b>
+                {{ form.confirm(class="form-control") }}
+                <small class="form-text text-muted">
+                  {{ form.confirm.description }}
+                </small>
+              </div>
+
+              <div class="mb-2">
+                <b>{{ form.website.label(clas="mb-2") }}</b>
+                {{ form.website(class="form-control") }}
+                <small class="form-text text-muted">
+                  {{ form.website.description }}
+                </small>
+              </div>
+
+              <div class="mb-2">
+                <b>{{ form.affiliation.label(clas="mb-2") }}</b>
+                {{ form.affiliation(class="form-control") }}
+                <small class="form-text text-muted">
+                  {{ form.affiliation.description }}
+                </small>
+              </div>
+
+              <div class="mb-2">
+                <b>{{ form.country.label(clas="mb-2") }}</b>
+                {{ form.country(class="form-select") }}
+                <small class="form-text text-muted">
+                  {{ form.country.description }}
+                </small>
+              </div>
+
+              <hr>
+
+              {{ render_extra_fields(form.extra) }}
+
+              <div id="results">
+                <div
+                    class="alert alert-success alert-dismissible submit-row"
+                    role="alert" x-cloak="success" x-show="success"
+                >
+                  <strong>Success!</strong>
+                  {% trans %}Your team's profile has been updated{% endtrans %}
+                  <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="alert" aria-label="Close">
+                  </button>
+                </div>
+
+                <template x-for="(msg, idx) in errors" :key="idx">
+                  <div class="alert alert-danger alert-dismissible" role="alert">
+                    <span class="sr-only">{% trans %}Error:{% endtrans %}</span>
+                    <span x-text="msg"></span>
+
+                    <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="alert" aria-label="Close">
+                    </button>
+                  </div>
+                </template>
+              </div>
+
+              {{ form.submit(class="btn btn-primary float-end px-4 modal-action") }}
+            </form>
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="team-captain-modal" x-data="TeamCaptainModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1050; background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-action text-center w-100">{% trans %}Choose Captain{% endtrans %}</h2>
+          <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body clearfix">
+          {% with form = Forms.teams.TeamCaptainForm(captain_id=team.captain_id) %}
+            <form id="team-captain-form" method="POST" @submit.prevent="updateCaptain()">
+              <div class="mb-3">
+                {{ form.captain_id.label(class="form-label") }}
+                {% for member in team.members %}
+                  {# Append members to the select choices #}
+                  {% set _ = form.captain_id.choices.append((member.id, member.name)) %}
+                {% endfor %}
+                {{ form.captain_id(class="form-select mb-2") }}
+              </div>
+              <div id="results">
+                <div
+                    class="alert alert-success alert-dismissible submit-row"
+                    role="alert"
+                    x-cloak="success"
+                    x-show="success"
+                >
+                  <strong>Success!</strong>
+                  {% trans %}Your captain rights have been transferred{% endtrans %}
+                  <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="alert" aria-label="Close">
+                  </button>
+                </div>
+                <template x-for="(msg, idx) in errors" :key="idx">
+                  <div class="alert alert-danger alert-dismissible" role="alert">
+                    <span class="sr-only">Error:</span>
+                    <span x-text="msg"></span>
+                    <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="alert" aria-label="Close">
+                    </button>
+                  </div>
+                </template>
+              </div>
+              {{ form.submit(class="btn btn-primary float-end px-4 modal-action") }}
+            </form>
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="team-invite-modal" x-data="TeamInviteModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1050; background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-action text-center w-100">{% trans %}Invite Users{% endtrans %}</h2>
+          <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body clearfix">
+          {% with form = Forms.teams.TeamInviteForm() %}
+            <form method="POST">
+              <div class="mb-3">
+                <b>{{ form.link.label(class="form-label") }}</b>
+
+                <div class="input-group mb-3">
+                  {{ form.link(id="team-invite-link", class="form-control", **{"x-ref": "link", "x-bind:value": "$store.inviteToken"}) }}
+
+                  <button class="btn btn-outline-secondary px-3" type="button" @click="copy()">
+                    <i class="fas fa-clipboard"></i>
+                  </button>
+                </div>
+
+                <small class="form-text text-muted">
+                  {% trans %}Share this link with your team members for them to join your team{% endtrans %}
+                </small>
+                <small class="form-text text-muted">
+                  {% trans %}Invite links can be re-used and expire after 1 day{% endtrans %}
+                </small>
+              </div>
+            </form>
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="team-disband-modal" x-data="TeamDisbandModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1050; background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog" role="document" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-action text-center w-100">{% trans %}Disband Team{% endtrans %}</h2>
+          <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">{% trans %}Are you sure you want to disband your team?{% endtrans %}</p>
+
+          <div class="mt-3">
+            <template x-for="(msg, idx) in errors" :key="idx">
+              <div class="alert alert-danger" role="alert">
+                <span class="sr-only">{% trans %}Error:{% endtrans %}</span>
+                <span x-text="msg"></span>
+              </div>
+            </template>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" @click="disbandTeam()" :disabled="errors.length > 0">{% trans %}Yes{% endtrans %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 队伍信息头部区域 -->
+  <div class="cyber-bg">
+    <div class="cyber-content-container">
+      <div class="cyber-card team-profile-card">
+        <!-- 队伍基本信息 -->
+        <div class="cyber-header-section">
+          <div class="cyber-avatar-container">
+            <div class="cyber-avatar">
+              <i class="fas fa-users fa-4x"></i>
+              <div class="cyber-glow"></div>
+            </div>
+          </div>
+          
+          <div class="cyber-team-info">
+            <h1 class="cyber-title">{{ team.name }}</h1>
+            
+            {% if user.team_id %}
+              <div class="cyber-team-badge">
+                <span class="cyber-badge">
+                  <i class="fas fa-users"></i>
+                  {{ user.team.name }}
+                </span>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- 队伍标签区域 -->
+        <div class="cyber-tags-section">
+          {% if team.oauth_id %}
+            <a href="https://majorleaguecyber.org/u/{{ team.name }}" class="cyber-tag official">
+              <i class="fas fa-shield-alt"></i>
+              {% trans %}Official{% endtrans %}
+            </a>
+          {% endif %}
+
+          {% if team.affiliation %}
+            <span class="cyber-tag affiliation">
+              <i class="fas fa-building"></i>
+              {{ team.affiliation }}
+            </span>
+          {% endif %}
+
+          {% if team.country %}
+            <span class="cyber-tag country">
+              <i class="flag-{{ team.country.lower() }}"></i>
+              {{ lookup_country_code(team.country) }}
+            </span>
+          {% endif %}
+
+          {% if team.bracket_id %}
+            <span class="cyber-tag bracket">
+              <i class="fas fa-trophy"></i>
+              {{ team.bracket.name }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- 自定义字段区域 -->
+        {% if team.fields %}
+          <div class="cyber-fields-section">
+            {% for field in team.fields %}
+              <div class="cyber-field-item">
+                <span class="cyber-field-name">{{ field.name }}:</span>
+                <span class="cyber-field-value">{{ field.value }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <!-- 统计信息区域 -->
+        <div class="cyber-stats-section">
+          <div class="cyber-stat-item">
+            <div class="cyber-stat-value">
+              {% if scores_visible() and place %}
+                {{ place }}
+              {% else %}
+                - 
+              {% endif %}
+            </div>
+            <div class="cyber-stat-label">{% trans %}排名{% endtrans %}</div>
+          </div>
+          
+          <div class="cyber-stat-item">
+            <div class="cyber-stat-value">
+              {% if score %}
+                {{ score }}
+              {% else %}
+                0
+              {% endif %}
+            </div>
+            <div class="cyber-stat-label">{% trans %}积分{% endtrans %}</div>
+          </div>
+          
+          <div class="cyber-stat-item">
+            <div class="cyber-stat-value">{{ team.members | length }}</div>
+            <div class="cyber-stat-label">{% trans %}成员{% endtrans %}</div>
+          </div>
+        </div>
+
+        <!-- 网站链接 -->
+        {% if team.website and (team.website.startswith('http://') or team.website.startswith('https://')) %}
+          <div class="cyber-website-section">
+            <a href="{{ team.website }}" target="_blank" class="cyber-website-link" rel="noopener">
+              <i class="fas fa-external-link-alt"></i>
+              {{ team.website }}
+            </a>
+          </div>
+        {% endif %}
+
+        <!-- 队伍操作按钮 -->
+        <div class="cyber-actions-section" x-data="CaptainMenu">
+          <div class="cyber-action-buttons">
+            <button class="cyber-action-btn cyber-btn-primary edit" @click="editTeam()">
+              <div class="cyber-btn-content">
+                <div class="cyber-btn-icon">
+                  <i class="fas fa-cogs"></i>
+                  <div class="cyber-btn-glow"></div>
+                </div>
+                <span class="cyber-btn-text">{% trans %}编辑队伍{% endtrans %}</span>
+              </div>
+              <div class="cyber-btn-border"></div>
+            </button>
+            
+            <button class="cyber-action-btn cyber-btn-secondary captain" @click="chooseCaptain()">
+              <div class="cyber-btn-content">
+                <div class="cyber-btn-icon">
+                  <i class="fas fa-user-tag"></i>
+                  <div class="cyber-btn-glow"></div>
+                </div>
+                <span class="cyber-btn-text">{% trans %}选择队长{% endtrans %}</span>
+              </div>
+              <div class="cyber-btn-border"></div>
+            </button>
+            
+            <button class="cyber-action-btn cyber-btn-success invite" @click="inviteMembers()">
+              <div class="cyber-btn-content">
+                <div class="cyber-btn-icon">
+                  <i class="fas fa-ticket-alt"></i>
+                  <div class="cyber-btn-glow"></div>
+                </div>
+                <span class="cyber-btn-text">{% trans %}邀请成员{% endtrans %}</span>
+              </div>
+              <div class="cyber-btn-border"></div>
+            </button>
+            
+            <button class="cyber-action-btn cyber-btn-danger disband" @click="disbandTeam()">
+              <div class="cyber-btn-content">
+                <div class="cyber-btn-icon">
+                  <i class="fas fa-trash-alt"></i>
+                  <div class="cyber-btn-glow"></div>
+                </div>
+                <span class="cyber-btn-text">{% trans %}解散队伍{% endtrans %}</span>
+              </div>
+              <div class="cyber-btn-border"></div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 成员管理区域 -->
+  <div class="cyber-content-container">
+    {% include "components/errors.html" %}
+
+    <div class="cyber-card members-section">
+      <div class="cyber-section-header">
+        <h3 class="cyber-section-title">
+          <i class="fas fa-users"></i>
+          {% trans %}队伍成员{% endtrans %}
+        </h3>
+      </div>
+      
+      <div class="cyber-table-container">
+        <table class="cyber-table">
+          <thead>
+            <tr>
+              <th class="cyber-table-header">{% trans %}用户名{% endtrans %}</th>
+              <th class="cyber-table-header">{% trans %}身份{% endtrans %}</th>
+              <th class="cyber-table-header">{% trans %}积分{% endtrans %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for member in team.members %}
+              <tr class="cyber-table-row">
+                <td class="cyber-table-cell">
+                  <a href="{{ url_for('users.public', user_id=member.id) }}" class="cyber-link">
+                    <i class="fas fa-user"></i>
+                    {{ member.name }}
+                  </a>
+                </td>
+                <td class="cyber-table-cell">
+                  <div class="cyber-member-badges">
+                    {% if team.captain_id == member.id %}
+                      <span class="cyber-badge captain-badge">
+                        <i class="fas fa-crown"></i>
+                        {% trans %}队长{% endtrans %}
+                      </span>
+                    {% else %}
+                      <span class="cyber-badge member-badge">
+                        <i class="fas fa-user"></i>
+                        {% trans %}成员{% endtrans %}
+                      </span>
+                    {% endif %}
+                    {% if member.bracket_id %}
+                      <span class="cyber-badge bracket-badge">{{ member.bracket.name }}</span>
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="cyber-table-cell">
+                  <span class="cyber-points">{{ member.score }}</span>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if solves or awards %}
+      {% if awards %}
+        <!-- 成就展示区域 -->
+        <div class="cyber-card awards-section">
+          <div class="cyber-section-header">
+            <h3 class="cyber-section-title">
+              <i class="fas fa-trophy"></i>
+              {% trans %}队伍成就{% endtrans %}
+            </h3>
+          </div>
+          
+          <div class="cyber-awards-grid">
+            {% for award in awards %}
+              <div class="cyber-award-item">
+                <div class="cyber-award-icon">
+                  <i class="award-icon award-{{ award.icon }} fa-3x"></i>
+                  <div class="cyber-award-glow"></div>
+                </div>
+                <div class="cyber-award-info">
+                  <h4 class="cyber-award-name">{{ award.name }}</h4>
+                  {% if award.category %}
+                    <p class="cyber-award-category">{{ award.category }}</p>
+                  {% endif %}
+                  {% if award.description %}
+                    <p class="cyber-award-description">{{ award.description }}</p>
+                  {% endif %}
+                  <div class="cyber-award-value">{{ award.value }} 积分</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- 解题记录区域 -->
+      <div class="cyber-card solves-section">
+        <div class="cyber-section-header">
+          <h3 class="cyber-section-title">
+            <i class="fas fa-flag-checkered"></i>
+            {% trans %}解题记录{% endtrans %}
+          </h3>
+        </div>
+        
+        <div class="cyber-table-container">
+          <table class="cyber-table">
+            <thead>
+              <tr>
+                <th class="cyber-table-header">{% trans %}挑战名称{% endtrans %}</th>
+                <th class="cyber-table-header d-none d-md-table-cell">{% trans %}分类{% endtrans %}</th>
+                <th class="cyber-table-header">{% trans %}分值{% endtrans %}</th>
+                <th class="cyber-table-header">{% trans %}时间{% endtrans %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for solve in solves %}
+                <tr class="cyber-table-row">
+                  <td class="cyber-table-cell">
+                    <a href="{{ url_for('challenges.listing') }}#{{ solve.challenge.name }}-{{ solve.challenge.id }}" class="cyber-link">
+                      <i class="fas fa-flag"></i>
+                      {{ solve.challenge.name }}
+                    </a>
+                  </td>
+                  <td class="cyber-table-cell d-none d-md-table-cell">
+                    <span class="cyber-category-badge">{{ solve.challenge.category }}</span>
+                  </td>
+                  <td class="cyber-table-cell">
+                    <span class="cyber-points">{{ solve.challenge.value }}</span>
+                  </td>
+                  <td class="cyber-table-cell">
+                    <span class="cyber-time" data-time="{{ solve.date | isoformat }}"></span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 统计图表区域 -->
+      <div class="cyber-card stats-section" x-data="TeamGraphs">
+        <div class="cyber-section-header">
+          <h3 class="cyber-section-title">
+            <i class="fas fa-chart-bar"></i>
+            统计概览
+          </h3>
+        </div>
+        
+        <div class="cyber-stats-grid">
+          <!-- 解题成功率 -->
+          <div class="cyber-stat-card">
+            <h4 class="cyber-stat-title">解题成功率</h4>
+            <div class="cyber-progress-container">
+              <div class="cyber-progress-bar">
+                <div 
+                  class="cyber-progress-fill success" 
+                  :style="{ width: `${getSolvePercentage()}%` }"
+                ></div>
+                <div 
+                  class="cyber-progress-fill fail" 
+                  :style="{ width: `${getFailPercentage()}%` }"
+                ></div>
+              </div>
+              <div class="cyber-progress-labels">
+                <span class="cyber-progress-label success">
+                  <i class="fas fa-check-circle"></i>
+                  <span x-text="`成功 (${getSolvePercentage()}%)`"></span>
+                </span>
+                <span class="cyber-progress-label fail">
+                  <i class="fas fa-times-circle"></i>
+                  <span x-text="`失败 (${getFailPercentage()}%)`"></span>
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 分类分布 -->
+          <div class="cyber-stat-card">
+            <h4 class="cyber-stat-title">分类分布</h4>
+            <div class="cyber-progress-container">
+              <div class="cyber-progress-bar">
+                <template x-for="category in getCategoryBreakdown()" :key="category.name">
+                  <div 
+                    class="cyber-progress-fill" 
+                    :style="{ width: `${category.percent}%`, 'background-color': category.color }"
+                  ></div>
+                </template>
+              </div>
+              <div class="cyber-progress-labels">
+                <template x-for="category in getCategoryBreakdown()" :key="category.name">
+                  <span class="cyber-progress-label">
+                    <i class="fas fa-circle" :style="{ color: category.color }"></i>
+                    <span x-text="`${category.name} (${category.percent}%)`"></span>
+                  </span>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 积分图表 -->
+        <div class="cyber-graph-section">
+          <div id="score-graph" x-ref="scoregraph" class="cyber-graph-container">
+            <div class="cyber-graph-loading">
+              <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+              <span>加载积分图表...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <!-- 无解题记录 -->
+      <div class="cyber-card no-solves-section">
+        <div class="cyber-empty-state">
+          <i class="fas fa-flag fa-4x"></i>
+          <h3 class="cyber-empty-title">{% trans %}No solves yet{% endtrans %}</h3>
+          <p class="cyber-empty-description">开始挑战，获取队伍的第一个积分！</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+      window.stats_data = {{ {
+        'type': 'team',
+        'id': team.id,
+        'name': team.name,
+        'account_id': 'me',
+      } | tojson }};
+
+      window.team_captain = {{ (user.id == team.captain_id) | tojson }};
+  </script>
+  {{ Assets.js("assets/js/teams/private.js") }}
+{% endblock %}

@@ -1,0 +1,382 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <!-- 赛博朋克题目页面头部 -->
+  <div class="cyber-challenges-header">
+    <div class="cyber-header-container">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h1 class="neon-glow">
+            <i class="fas fa-flag me-3"></i>
+            {% trans %}题目{% endtrans %}
+          </h1>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cyber-content-container">
+    <div class="row">
+      <div class="col-md-12">
+        {% include "components/errors.html" %}
+      </div>
+    </div>
+
+    <!-- 题目板 -->
+    <div 
+      x-data="ChallengeBoard" 
+      @load-challenges.window="loadChallenges()" 
+      @load-challenge.window="loadChallenge($event.detail)"
+      class="cyber-challenge-board"
+    >
+      <!-- 题目模态窗口 -->
+      <div
+          x-ref="challengeWindow" id="challenge-window" class="cyber-modal" 
+          style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1060;"
+          x-html="$store.challenge.data.view"
+      ></div>
+
+      <!-- 加载状态 -->
+      <div x-show="!loaded">
+        <div class="cyber-loading-container min-vh-50 d-flex align-items-center">
+          <div class="text-center w-100">
+            <div class="cyber-loading">
+              <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
+              <p class="mt-3 cyber-loading-text">
+                <i class="fas fa-database me-2"></i>
+                {% trans %}Loading challenge database...{% endtrans %}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 题目列表 -->
+      <div x-show="loaded" class="cyber-challenges-grid">
+        <template x-for="(category, idx) in getCategories()" :key="idx">
+          <div class="cyber-category-section">
+            <!-- 分类标题 -->
+            <div class="cyber-category-header mb-4">
+              <h3 class="cyber-category-title neon-glow">
+                <i class="fas fa-folder me-2"></i>
+                <span x-text="category"></span>
+              </h3>
+              <div class="cyber-category-stats">
+                <span class="cyber-category-count" x-text="getChallenges(category).length"></span>
+                <span class="cyber-category-label">{% trans %}Challenges{% endtrans %}</span>
+              </div>
+            </div>
+
+            <!-- 题目网格 -->
+            <div class="cyber-challenges-container">
+              <div class="row cyber-challenges-row">
+                <template x-for="(c, idx) in getChallenges(category)" :key="c.id">
+                  <div class="col-sm-6 col-md-4 col-lg-3 my-3">
+                    <button
+                        class="cyber-challenge-card w-100 h-100"
+                        :class="[
+                          c.solved_by_me ? 'cyber-challenge-solved' : 'cyber-challenge-unsolved',
+                          ...c.tags.map((tag) => `cyber-tag-${tag.value.replace(/ /g, '-')}`),
+                        ];"
+                        :value="c.id" @click="loadChallenge(c.id)"
+                    >
+                      <div class="cyber-challenge-content">
+                        <!-- 题目状态指示器 -->
+                        <div class="cyber-challenge-status">
+                          <template x-if="c.solved_by_me">
+                            <i class="fas fa-check-circle cyber-status-solved"></i>
+                          </template>
+                          <template x-if="!c.solved_by_me">
+                            <i class="fas fa-lock cyber-status-unsolved"></i>
+                          </template>
+                        </div>
+
+                        <!-- 题目信息 -->
+                        <div class="cyber-challenge-info">
+                          <h4 class="cyber-challenge-name" x-text="c.name"></h4>
+                          <div class="cyber-challenge-points">
+                            <span class="cyber-points-value" x-text="c.value"></span>
+                            <span class="cyber-points-label">{% trans %}Points{% endtrans %}</span>
+                          </div>
+                        </div>
+
+                        <!-- 题目标签 -->
+                        <div class="cyber-challenge-tags">
+                          <template x-for="tag in c.tags.slice(0, 2)">
+                            <span class="cyber-tag" x-text="tag.value"></span>
+                          </template>
+                          <template x-if="c.tags.length > 2">
+                            <span class="cyber-tag-more">+<span x-text="c.tags.length - 2"></span></span>
+                          </template>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <!-- 赛博朋克装饰元素 -->
+  <div class="cyber-decoration">
+    <div class="cyber-pulse-dots"></div>
+    <div class="cyber-data-stream"></div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ Assets.js("assets/js/challenges.js") }}
+  
+  <script>
+    // 赛博朋克题目页面特效
+    document.addEventListener('DOMContentLoaded', function() {
+      // 题目卡片悬停效果
+      const challengeCards = document.querySelectorAll('.cyber-challenge-card');
+      challengeCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateY(-10px) scale(1.05)';
+          this.style.boxShadow = '0 10px 30px rgba(0, 255, 255, 0.4)';
+        });
+        card.addEventListener('mouseleave', function() {
+          this.style.transform = 'translateY(0) scale(1)';
+          this.style.boxShadow = '0 4px 15px rgba(0, 255, 255, 0.2)';
+        });
+      });
+
+      // 动态难度指示器
+      const updateDifficultyIndicators = () => {
+        const challengePoints = document.querySelectorAll('.cyber-points-value');
+        challengePoints.forEach(element => {
+          const points = parseInt(element.textContent);
+          const card = element.closest('.cyber-challenge-card');
+          
+          if (points >= 500) {
+            card.style.borderColor = '#ff0000';
+            card.style.boxShadow = '0 4px 15px rgba(255, 0, 0, 0.3)';
+          } else if (points >= 300) {
+            card.style.borderColor = '#ff9900';
+            card.style.boxShadow = '0 4px 15px rgba(255, 153, 0, 0.3)';
+          } else if (points >= 100) {
+            card.style.borderColor = '#ffff00';
+            card.style.boxShadow = '0 4px 15px rgba(255, 255, 0, 0.3)';
+          } else {
+            card.style.borderColor = '#00ff00';
+            card.style.boxShadow = '0 4px 15px rgba(0, 255, 0, 0.3)';
+          }
+        });
+      };
+
+      // 监听题目加载完成事件
+      document.addEventListener('alpine:initialized', () => {
+        setTimeout(updateDifficultyIndicators, 1000);
+      });
+    });
+  </script>
+
+  <style>
+    /* 题目页面特定样式 */
+    .cyber-challenges-header {
+      background: linear-gradient(135deg, rgba(10, 10, 20, 0.9), rgba(26, 26, 46, 0.9));
+      border-bottom: 2px solid #ff00ff;
+      padding: 3rem 0;
+      margin-bottom: 2rem;
+      box-shadow: 0 0 30px rgba(255, 0, 255, 0.2);
+    }
+
+    .cyber-challenge-board {
+      position: relative;
+      z-index: 10;
+    }
+
+    .cyber-challenges-grid {
+      margin-top: 2rem;
+    }
+
+    .cyber-category-section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: rgba(26, 26, 46, 0.6);
+      border: 1px solid #ff00ff;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+    }
+
+    .cyber-category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 0, 255, 0.3);
+    }
+
+    .cyber-category-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin: 0;
+      color: #ff00ff;
+    }
+
+    .cyber-category-stats {
+      text-align: center;
+    }
+
+    .cyber-category-count {
+      display: block;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ff00ff;
+      text-shadow: 0 0 10px #ff00ff;
+    }
+
+    .cyber-category-label {
+      display: block;
+      font-size: 0.9rem;
+      color: #a0a0cc;
+      letter-spacing: 1px;
+    }
+
+    .cyber-challenge-card {
+      background: linear-gradient(135deg, rgba(20, 20, 40, 0.9), rgba(40, 40, 80, 0.9));
+      border: 2px solid #00ffff;
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
+      z-index: 1050; /* 确保题目卡片显示在modal-backdrop之上 */
+    }
+
+    .cyber-challenge-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .cyber-challenge-card:hover::before {
+      left: 100%;
+    }
+
+    .cyber-challenge-card.cyber-challenge-solved {
+      border-color: #00ff88;
+      box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+    }
+
+    .cyber-challenge-card.cyber-challenge-unsolved {
+      border-color: #ff4444;
+      box-shadow: 0 4px 15px rgba(255, 68, 68, 0.3);
+    }
+
+    .cyber-challenge-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .cyber-challenge-status {
+      margin-bottom: 1rem;
+    }
+
+    .cyber-status-solved {
+      font-size: 2rem;
+      color: #00ff88;
+      text-shadow: 0 0 10px #00ff88;
+    }
+
+    .cyber-status-unsolved {
+      font-size: 2rem;
+      color: #ff4444;
+      text-shadow: 0 0 10px #ff4444;
+    }
+
+    .cyber-challenge-info {
+      margin-bottom: 1rem;
+    }
+
+    .cyber-challenge-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #e0e0ff;
+      margin-bottom: 0.5rem;
+      letter-spacing: 1px;
+    }
+
+    .cyber-challenge-points {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .cyber-points-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ffff00;
+      text-shadow: 0 0 5px #ffff00;
+    }
+
+    .cyber-points-label {
+      font-size: 0.9rem;
+      color: #a0a0cc;
+    }
+
+    .cyber-challenge-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      justify-content: center;
+    }
+
+    .cyber-tag {
+      background: rgba(0, 255, 255, 0.2);
+      color: #00ffff;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    .cyber-tag-more {
+      background: rgba(255, 0, 255, 0.2);
+      color: #ff00ff;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      font-size: 0.8rem;
+    }
+
+    .cyber-modal .modal-content {
+      background: linear-gradient(135deg, rgba(10, 10, 20, 0.95), rgba(26, 26, 46, 0.95));
+      border: 2px solid #00ffff;
+      border-radius: 15px;
+      color: #e0e0ff;
+      z-index: 1060; /* 确保模态窗口内容显示在题目卡片之上 */
+    }
+
+    .cyber-modal .modal-header {
+      border-bottom: 1px solid #00ffff;
+      background: rgba(0, 255, 255, 0.1);
+    }
+
+    .cyber-modal .modal-title {
+      color: #00ffff;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .cyber-modal .close {
+      color: #ff00ff;
+      text-shadow: 0 0 5px #ff00ff;
+    }
+  </style>
+{% endblock %}

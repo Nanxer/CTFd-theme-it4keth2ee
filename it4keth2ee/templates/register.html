@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <!-- 注册页面主容器 -->
+  <div class="container-fluid cyber-register-container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-4">
+        <!-- 赛博朋克注册卡片 -->
+        <div class="card cyber-register-card">
+          <!-- 卡片头部 -->
+          <div class="card-header text-center cyber-card-header">
+            <div class="cyber-terminal-icon">
+              <i class="fas fa-user-plus"></i>
+            </div>
+            <h2 class="cyber-title mb-2">
+              {% trans %}创建账户{% endtrans %}
+            </h2>
+          </div>
+          
+          <!-- 卡片主体 -->
+          <div class="card-body cyber-card-body">
+            {% include "components/errors.html" %}
+
+            <!-- 注册表单 -->
+            {% with form = Forms.auth.RegistrationForm() %}
+              {% from "macros/forms.html" import render_extra_fields %}
+
+              <form method="post" accept-charset="utf-8" role="form" class="cyber-register-form">
+                <!-- 用户名输入区域 -->
+                <div class="cyber-input-group">
+                  <label class="cyber-input-label">
+                    <i class="fas fa-user me-2"></i>
+                    {{ form.name.label.text }}
+                  </label>
+                  <div class="cyber-input-wrapper">
+                    {{ form.name(class="cyber-input-field", value=name, autocomplete="username", placeholder="Enter your username") }}
+                  </div>
+                  <small class="cyber-input-hint">
+                    <i class="fas fa-info-circle me-1"></i>
+                    {% trans %}Your username on the site{% endtrans %}
+                  </small>
+                </div>
+
+                <!-- 邮箱输入区域 -->
+                <div class="cyber-input-group">
+                  <label class="cyber-input-label">
+                    <i class="fas fa-envelope me-2"></i>
+                    {{ form.email.label.text }}
+                  </label>
+                  <div class="cyber-input-wrapper">
+                    {{ form.email(class="cyber-input-field", value=email, autocomplete="email", placeholder="Enter your email") }}
+                  </div>
+                  <small class="cyber-input-hint">
+                    <i class="fas fa-shield-alt me-1"></i>
+                    {% trans %}Never shown to the public{% endtrans %}
+                  </small>
+                </div>
+
+                <!-- 密码输入区域 -->
+                <div class="cyber-input-group">
+                  <label class="cyber-input-label">
+                    <i class="fas fa-key me-2"></i>
+                    {{ form.password.label.text }}
+                  </label>
+                  <div class="cyber-input-wrapper">
+                    {{ form.password(class="cyber-input-field", value=password, autocomplete="new-password", placeholder="Create a strong password") }}
+                  </div>
+                  <small class="cyber-input-hint">
+                    <i class="fas fa-lock me-1"></i>
+                    {% trans %}Password used to log into your account{% endtrans %}
+                  </small>
+                </div>
+
+                {{ form.nonce() }}
+
+                <!-- 额外字段 -->
+                {{ render_extra_fields(form.extra) }}
+
+                <!-- 注册按钮 -->
+                <div class="cyber-action-group">
+                  {{ form.submit(class="cyber-submit-btn") }}
+                </div>
+
+                <!-- 登录链接 -->
+                <div class="cyber-login-section">
+                  <small class="cyber-login-text">
+                    {% trans %}Already have an account?{% endtrans %}
+                    <a class="cyber-login-link" href="{{ url_for('auth.login') }}">
+                      <i class="fas fa-sign-in-alt me-1"></i>
+                      {% trans %}Sign in{% endtrans %}
+                    </a>
+                  </small>
+                </div>
+
+                <!-- 服务条款 -->
+                {% if Configs.tos_or_privacy %}
+                  <div class="cyber-tos-section">
+                    <small class="cyber-tos-text">
+                      <i class="fas fa-file-contract me-1"></i>
+                      {% trans trimmed privacy_link=Configs.privacy_link, tos_link=Configs.tos_link %}
+                      By registering, you agree to the
+                      <a href="{{ privacy_link }}" target="_blank">privacy policy</a>
+                      and <a href="{{ tos_link }}" target="_blank">terms of service</a>
+                      {% endtrans %}
+                    </small>
+                  </div>
+                {% endif %}
+              </form>
+            {% endwith %}
+          </div>
+        </div>
+
+        <!-- 安全扫描装饰 -->
+        <div class="cyber-security-section">
+          <div class="cyber-scanner">
+            <div class="scanner-line"></div>
+          </div>
+          <small class="cyber-security-text">
+            <i class="fas fa-exclamation-triangle me-1"></i>
+            {% trans %}Secure registration process{% endtrans %}
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 赛博朋克背景装饰 -->
+  <div class="cyber-register-background">
+    <div class="cyber-grid-overlay"></div>
+    <div class="cyber-particles-overlay"></div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script>
+    // 赛博朋克注册页面特效
+    document.addEventListener('DOMContentLoaded', function() {
+      // 输入框聚焦效果
+      const inputs = document.querySelectorAll('.cyber-input-field');
+      inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+          this.parentElement.classList.add('cyber-input-focused');
+        });
+        input.addEventListener('blur', function() {
+          this.parentElement.classList.remove('cyber-input-focused');
+        });
+      });
+
+      // 扫描线动画
+      const scanner = document.querySelector('.scanner-line');
+      if (scanner) {
+        setInterval(() => {
+          scanner.style.animation = 'none';
+          setTimeout(() => {
+            scanner.style.animation = 'scan 2s linear infinite';
+          }, 10);
+        }, 4000);
+      }
+    });
+  </script>
+
+  <style>
+    /* 扫描动画 */
+    @keyframes scan {
+      0% { transform: translateY(-100%); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(100%); opacity: 0; }
+    }
+
+    .cyber-scanner {
+      position: relative;
+      height: 2px;
+      background: rgba(0, 255, 255, 0.3);
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .scanner-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, #00ffff, transparent);
+      animation: scan 2s linear infinite;
+    }
+  </style>
+{% endblock %}

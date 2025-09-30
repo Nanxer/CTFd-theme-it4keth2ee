@@ -1,0 +1,45 @@
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px; /* Margin bottom by footer height */
+}
+
+.footer {
+  position: absolute;
+
+  /* prevent scrollbars from showing on pages that don't use the full page height */
+  bottom: 1px;
+
+  width: 100%;
+
+  /* Set the fixed height of the footer here */
+  height: 60px;
+
+  /* Override line-height from core because we have two lines in the admin panel */
+  line-height: normal !important;
+
+  /* Avoid covering things */
+  z-index: -20;
+
+  /* 赛博朋克风格美化 */
+  background: var(--cyber-dark-surface) !important;
+  border-top: 2px solid var(--cyber-neon-cyan);
+  box-shadow: 0 0 20px var(--cyber-neon-cyan);
+  color: var(--cyber-text-primary);
+  font-family: 'Courier New', monospace;
+}
+
+.footer a {
+  color: var(--cyber-neon-cyan);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: var(--cyber-neon-magenta);
+  text-shadow: 0 0 5px var(--cyber-neon-magenta);
+}

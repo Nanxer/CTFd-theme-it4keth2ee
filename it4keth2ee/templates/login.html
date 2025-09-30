@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <!-- 登录页面主容器 -->
+  <div class="container-fluid cyber-login-container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-4">
+        <!-- 赛博朋克登录卡片 -->
+        <div class="card cyber-login-card">
+          <!-- 卡片头部 -->
+          <div class="card-header text-center cyber-card-header">
+            <div class="cyber-terminal-icon">
+              <i class="fas fa-terminal"></i>
+            </div>
+            <h2 class="cyber-title mb-2">
+              {% trans %}系统登录{% endtrans %}
+            </h2>
+          </div>
+          
+          <!-- 卡片主体 -->
+          <div class="card-body cyber-card-body">
+            {% include "components/errors.html" %}
+
+            <!-- 登录表单 -->
+            {% with form = Forms.auth.LoginForm() %}
+              <form method="post" accept-charset="utf-8" class="cyber-login-form">
+                <!-- 用户名输入区域 -->
+                <div class="cyber-input-group">
+                  <label class="cyber-input-label">
+                    <i class="fas fa-user me-2"></i>
+                    {{ form.name.label.text }}
+                  </label>
+                  <div class="cyber-input-wrapper">
+                    <span class="cyber-input-icon">
+                    </span>
+                    {{ form.name(class="cyber-input-field", value=name, autocomplete="username email", placeholder="Enter your username or email") }}
+                  </div>
+                </div>
+
+                <!-- 密码输入区域 -->
+                <div class="cyber-input-group">
+                  <label class="cyber-input-label">
+                    <i class="fas fa-key me-2"></i>
+                    {{ form.password.label.text }}
+                  </label>
+                  <div class="cyber-input-wrapper">
+                    {{ form.password(class="cyber-input-field", value=password, autocomplete="current-password", placeholder="Enter your password") }}
+                  </div>
+                </div>
+
+                <!-- 操作按钮区域 -->
+                <div class="cyber-action-group">
+                  <a class="cyber-forgot-link" href="{{ url_for('auth.reset_password') }}">
+                    <i class="fas fa-question-circle me-1"></i>
+                    {% trans %}Forgot password?{% endtrans %}
+                  </a>
+                  {{ form.submit(class="cyber-submit-btn") }}
+                </div>
+
+                <!-- 注册链接 -->
+                {% if registration_visible() %}
+                  <div class="cyber-register-section">
+                    <small class="cyber-register-text">
+                      {% trans %}New to the system?{% endtrans %}
+                      <a class="cyber-register-link" href="{{ url_for('auth.register') }}">
+                        <i class="fas fa-user-plus me-1"></i>
+                        {% trans %}Create account{% endtrans %}
+                      </a>
+                    </small>
+                  </div>
+                {% endif %}
+
+                {{ form.nonce() }}
+              </form>
+            {% endwith %}
+          </div>
+        </div>
+
+        <!-- 安全扫描装饰 -->
+        <div class="cyber-security-section">
+          <div class="cyber-scanner">
+            <div class="scanner-line"></div>
+          </div>
+          <small class="cyber-security-text">
+            <i class="fas fa-exclamation-triangle me-1"></i>
+            {% trans %}Unauthorized access is prohibited{% endtrans %}
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 赛博朋克背景装饰 -->
+  <div class="cyber-login-background">
+    <div class="cyber-grid-overlay"></div>
+    <div class="cyber-particles-overlay"></div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script>
+    // 赛博朋克登录页面特效
+    document.addEventListener('DOMContentLoaded', function() {
+      // 输入框聚焦效果
+      const inputs = document.querySelectorAll('.cyber-input-field');
+      inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+          this.parentElement.classList.add('cyber-input-focused');
+        });
+        input.addEventListener('blur', function() {
+          this.parentElement.classList.remove('cyber-input-focused');
+        });
+      });
+
+      // 扫描线动画
+      const scanner = document.querySelector('.scanner-line');
+      if (scanner) {
+        setInterval(() => {
+          scanner.style.animation = 'none';
+          setTimeout(() => {
+            scanner.style.animation = 'scan 2s linear infinite';
+          }, 10);
+        }, 4000);
+      }
+    });
+  </script>
+
+  <style>
+    /* 扫描动画 */
+    @keyframes scan {
+      0% { transform: translateY(-100%); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(100%); opacity: 0; }
+    }
+
+    .cyber-scanner {
+      position: relative;
+      height: 2px;
+      background: rgba(0, 255, 255, 0.3);
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .scanner-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, #00ffff, transparent);
+      animation: scan 2s linear infinite;
+    }
+  </style>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import render_extra_fields %}
+
+{% block content %}
+  <div class="cyber-settings-header">
+    <div class="cyber-header-container">
+      <h1 class="neon-glow">
+        <i class="fas fa-cog me-3"></i>
+        设置
+      </h1>
+    </div>
+  </div>
+
+  <div class="cyber-content-container">
+    <div class="cyber-settings-layout">
+      <!-- 内容区域 -->
+      <div class="cyber-settings-content">
+            {% include "components/errors.html" %}
+
+            {% with form = Forms.self.SettingsForm(language=language, country=country) %}
+              <form
+                  method="post" accept-charset="utf-8" autocomplete="off" role="form"
+                  x-data="SettingsForm"
+                  @submit.prevent="updateProfile()"
+                  class="cyber-settings-form"
+              >
+                <!-- 基本信息区域 -->
+                <div class="cyber-form-section">
+                  <h3 class="cyber-section-title">
+                    <i class="fas fa-id-card me-2"></i>
+                    基本信息
+                  </h3>
+                  
+                  <div class="cyber-form-group">
+                    <label class="cyber-form-label">用户名</label>
+                    {{ form.name(class="cyber-form-input", value=name) }}
+                  </div>
+
+                  <div class="cyber-form-group">
+                    <label class="cyber-form-label">邮箱地址</label>
+                    {{ form.email(class="cyber-form-input", value=email) }}
+                  </div>
+
+                  <div class="cyber-form-group">
+                    <label class="cyber-form-label">语言设置</label>
+                    <select class="cyber-form-select" name="language" id="language">
+                      <option value="en" {% if language == 'en' %}selected{% endif %}>English</option>
+                      <option value="zh" {% if language == 'zh' %}selected{% endif %}>中文</option>
+                      <option value="zh_CN" {% if language == 'zh_CN' %}selected{% endif %}>简体中文</option>
+                      <option value="zh_TW" {% if language == 'zh_TW' %}selected{% endif %}>繁體中文</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 密码修改区域 -->
+                <div class="cyber-form-section">
+                  <h3 class="cyber-section-title">
+                    <i class="fas fa-lock me-2"></i>
+                    修改密码
+                  </h3>
+                  
+                  <div class="cyber-form-group">
+                    <label class="cyber-form-label">当前密码</label>
+                    {{ form.confirm(class="cyber-form-input") }}
+                  </div>
+                  
+                  <div class="cyber-form-group">
+                    <label class="cyber-form-label">新密码</label>
+                    {{ form.password(class="cyber-form-input") }}
+                  </div>
+                </div>
+
+                <!-- 个人信息区域 -->
+                <div class="cyber-form-section">
+                  <h3 class="cyber-section-title">
+                    <i class="fas fa-info-circle me-2"></i>
+                    个人信息
+                  </h3>
+                  
+                  <div class="cyber-form-group">
+                    <label class="cyber-form-label">所属组织</label>
+                    {{ form.affiliation(class="cyber-form-input", value=affiliation or "") }}
+                  </div>
+                  
+                  <div class="cyber-form-group">
+                    <label class="cyber-form-label">个人网站</label>
+                    {{ form.website(class="cyber-form-input", value=website or "") }}
+                  </div>
+                  
+                  <div class="cyber-form-group">
+                    <label class="cyber-form-label">国家/地区</label>
+                    {{ form.country(class="cyber-form-select", value=country) }}
+                  </div>
+                </div>
+
+                <!-- 自定义字段 -->
+                {{ render_extra_fields(form.extra) }}
+
+                <!-- 操作结果 -->
+                <div id="results" class="cyber-form-results">
+                  <div
+                      class="cyber-alert cyber-alert-success" role="alert"
+                      x-cloak="success" x-show="success"
+                  >
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>成功!</strong>
+                    您的个人信息已更新
+                    <button type="button" class="cyber-alert-close" data-bs-dismiss="alert" aria-label="Close">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+
+                  <template x-for="(msg, idx) in errors" :key="idx">
+                    <div class="cyber-alert cyber-alert-error" role="alert">
+                      <i class="fas fa-exclamation-triangle me-2"></i>
+                      <span class="sr-only">错误:</span>
+                      <span x-text="msg"></span>
+                      <button
+                          type="button" class="cyber-alert-close" data-bs-dismiss="alert"
+                          aria-label="Close"
+                      >
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                  </template>
+                </div>
+
+                <!-- 提交按钮 -->
+                <div class="cyber-form-actions">
+                  <button type="submit" class="cyber-btn cyber-btn-primary">
+                    <i class="fas fa-save me-2"></i>
+                    保存更改
+                  </button>
+                </div>
+              </form>
+            {% endwith %}
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ Assets.js("assets/js/settings.js") }}
+{% endblock %}

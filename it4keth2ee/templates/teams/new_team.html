@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  /* 新建团队页面赛博朋克样式 */
+  .cyber-create-header {
+    background: linear-gradient(135deg, rgba(10, 10, 20, 0.9), rgba(26, 26, 46, 0.9));
+    border-bottom: 2px solid #ff00ff;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cyber-create-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 49%, rgba(255, 0, 255, 0.1) 50%, transparent 51%);
+    background-size: 10px 10px;
+    animation: scanline 2s linear infinite;
+  }
+
+  .cyber-create-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #ff00ff;
+    text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .cyber-create-form {
+    background: rgba(26, 26, 46, 0.8);
+    border: 2px solid #00ffff;
+    border-radius: 15px;
+    padding: 3rem;
+    backdrop-filter: blur(10px);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .cyber-form-label {
+    color: #00ffff;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  .cyber-form-control {
+    background: rgba(20, 20, 40, 0.9);
+    border: 1px solid #00ffff;
+    color: #e0e0ff;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .cyber-form-control:focus {
+    background: rgba(30, 30, 60, 0.9);
+    border-color: #ff00ff;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+    color: #ffffff;
+    outline: none;
+  }
+
+  .cyber-form-control::placeholder {
+    color: #a0a0cc;
+  }
+
+  .cyber-submit-btn {
+    background: linear-gradient(135deg, #ff00ff, #00ffff);
+    border: none;
+    border-radius: 10px;
+    color: #000;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    float: right;
+    min-width: 150px;
+  }
+
+  .cyber-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 0, 255, 0.4);
+  }
+
+  .cyber-info-text {
+    color: #e0e0ff;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    text-align: center;
+    background: rgba(255, 0, 255, 0.1);
+    border: 1px solid rgba(255, 0, 255, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .cyber-info-highlight {
+    color: #ff00ff;
+    font-weight: 600;
+    text-shadow: 0 0 5px #ff00ff;
+  }
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  @media (max-width: 768px) {
+    .cyber-create-form {
+      padding: 2rem;
+      margin: 0 1rem;
+    }
+    
+    .cyber-submit-btn {
+      float: none;
+      width: 100%;
+      margin-top: 1rem;
+    }
+  }
+</style>
+
+<div class="cyber-create-header">
+  <div class="container">
+    <h1>{% trans %}创建团队{% endtrans %}</h1>
+  </div>
+</div>
+
+<div class="container">
+  <div class="cyber-create-form">
+    {% include "components/errors.html" %}
+
+    {% with form = Forms.teams.TeamRegisterForm() %}
+      {% from "macros/forms.html" import render_extra_fields %}
+      <form method="POST">
+        <div class="mb-4">
+          <label class="cyber-form-label">{{ form.name.label.text }}</label>
+          {{ form.name(class="form-control cyber-form-control", placeholder="输入团队名称") }}
+        </div>
+        
+        <div class="mb-4">
+          <label class="cyber-form-label">{{ form.password.label.text }}</label>
+          {{ form.password(class="form-control cyber-form-control", placeholder="设置团队密码") }}
+        </div>
+
+        {{ render_extra_fields(form.extra) }}
+
+        <div class="mb-4">
+          <p class="cyber-info-text">
+            创建团队后，请将<span class="cyber-info-highlight">团队名称</span>和<span class="cyber-info-highlight">密码</span>分享给您的队友，以便他们加入您的团队。
+          </p>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            {{ form.submit(class="btn cyber-submit-btn") }}
+          </div>
+        </div>
+        {{ form.nonce() }}
+      </form>
+    {% endwith %}
+  </div>
+</div>
+{% endblock %}

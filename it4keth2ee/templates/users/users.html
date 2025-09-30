@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  /* 用户页面赛博朋克样式 */
+  .cyber-users-header {
+    background: linear-gradient(135deg, rgba(10, 10, 20, 0.9), rgba(26, 26, 46, 0.9));
+    border-bottom: 2px solid #ff00ff;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cyber-users-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 49%, rgba(255, 0, 255, 0.1) 50%, transparent 51%);
+    background-size: 10px 10px;
+    animation: scanline 2s linear infinite;
+  }
+
+  .cyber-users-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #ff00ff;
+    text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .cyber-users-search {
+    background: rgba(26, 26, 46, 0.8);
+    border: 2px solid #00ffff;
+    border-radius: 10px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .cyber-users-search .form-control {
+    background: rgba(20, 20, 40, 0.9);
+    border: 1px solid #00ffff;
+    color: #e0e0ff;
+    border-radius: 5px;
+  }
+
+  .cyber-users-search .form-control:focus {
+    background: rgba(30, 30, 60, 0.9);
+    border-color: #ff00ff;
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+    color: #ffffff;
+  }
+
+  .cyber-users-search .btn-primary {
+    background: linear-gradient(135deg, #ff00ff, #00ffff);
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+  }
+
+  .cyber-users-search .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 0, 255, 0.4);
+  }
+
+  .cyber-users-table {
+    background: rgba(26, 26, 46, 0.8);
+    border: 2px solid #00ffff;
+    border-radius: 10px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+
+  .cyber-users-table thead {
+    background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.2));
+  }
+
+  .cyber-users-table th {
+    color: #00ffff;
+    font-weight: 600;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #ff00ff;
+    padding: 1rem;
+  }
+
+  .cyber-users-table td {
+    color: #e0e0ff;
+    border-bottom: 1px solid rgba(255, 0, 255, 0.3);
+    padding: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .cyber-users-table tbody tr:hover td {
+    background: rgba(255, 0, 255, 0.1);
+    transform: translateX(5px);
+  }
+
+  .cyber-user-link {
+    color: #00ffff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .cyber-user-link:hover {
+    color: #ff00ff;
+    text-shadow: 0 0 10px #ff00ff;
+  }
+
+  .cyber-badge {
+    background: linear-gradient(135deg, #ff00ff, #00ffff);
+    color: #000;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .cyber-pagination {
+    background: rgba(26, 26, 46, 0.8);
+    border: 1px solid #00ffff;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 2rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .cyber-pagination a {
+    color: #00ffff;
+    text-decoration: none;
+    margin: 0 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #00ffff;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+  }
+
+  .cyber-pagination a:hover {
+    background: #00ffff;
+    color: #000;
+    transform: translateY(-2px);
+  }
+
+  .cyber-pagination select {
+    background: rgba(20, 20, 40, 0.9);
+    border: 1px solid #00ffff;
+    color: #e0e0ff;
+    border-radius: 5px;
+    padding: 0.5rem;
+  }
+
+  .cyber-search-results .text-cyber {
+    color: #00ffff;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+  }
+
+  .cyber-search-results .text-cyber-secondary {
+    color: #a0a0cc;
+    font-size: 0.9rem;
+  }
+
+  .cyber-highlight {
+    color: #ff00ff;
+    text-shadow: 0 0 5px #ff00ff;
+  }
+
+  .cyber-pagination-label {
+    color: #00ffff;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-right: 1rem;
+  }
+
+  .cyber-pagination-prev,
+  .cyber-pagination-next {
+    color: #00ffff;
+    text-decoration: none;
+    margin: 0 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #00ffff;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+  }
+
+  .cyber-pagination-prev:hover,
+  .cyber-pagination-next:hover {
+    background: #00ffff;
+    color: #000;
+    transform: translateY(-2px);
+  }
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+</style>
+
+<div class="cyber-users-header">
+	<div class="container">
+		<h1>{% trans %}用户{% endtrans %}</h1>
+	</div>
+</div>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        {% if q and field %}
+          <div class="cyber-search-results text-center mb-3">
+            <h5 class="text-cyber">
+              搜索用户 <strong class="cyber-highlight">{{ field }}</strong> 匹配 <strong class="cyber-highlight">{{ q }}</strong>
+            </h5>
+            <h6 class="text-cyber-secondary">
+              第 {{ users.page }} 页，共 {{ users.total }} 个结果
+            </h6>
+          </div>
+        {% endif %}
+
+        {% with form = Forms.users.PublicUserSearchForm(field=field, q=q) %}
+          <div class="cyber-users-search">
+            <form method="GET" class="row justify-content-around align-items-center">
+              <div class="mb-3 col-md-2">
+                {{ form.field(class="form-select w-100") }}
+              </div>
+
+              <div class="mb-3 col-md-8">
+                {{ form.q(class="form-control w-100", placeholder="搜索匹配的用户") }}
+              </div>
+
+              <div class="mb-3 col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                  <i class="fas fa-search" aria-hidden="true"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        {% endwith %}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <table class="table align-middle cyber-users-table">
+          <thead>
+          <tr>
+            <th class="text-md-start">{% trans %}用户{% endtrans %}</th>
+			<th>{% trans %}网站{% endtrans %}</th>
+			<th class="d-none d-md-table-cell">{% trans %}所属机构{% endtrans %}</th>
+			<th class="d-none d-md-table-cell">{% trans %}国家{% endtrans %}</th>
+          </tr>
+          </thead>
+          <tbody>
+
+          {% for user in users.items %}
+            <tr>
+              <td>
+                {% if scores_visible() %}
+                  <a href="{{ url_for('users.public', user_id=user.id) }}" class="cyber-user-link">{{ user.name | truncate(50) }}</a>
+                {% else %}
+                  <span class="cyber-user-link">{{ user.name | truncate(50) }}</span>
+                {% endif %}
+
+                {% if user.bracket_id %}
+                  <span class="badge cyber-badge ms-2">{{ user.bracket.name }}</span>
+                {% endif %}
+
+                {% if user.oauth_id %}
+                  <a href="https://majorleaguecyber.org/u/{{ user.name }}" class="cyber-user-link">
+                    <span class="badge cyber-badge ms-2">官方</span>
+                  </a>
+                {% endif %}
+              </td>
+
+              <td style="width: 10px;">
+                {% if user.website and (user.website.startswith('http://') or user.website.startswith('https://')) %}
+                  <a href="{{ user.website }}" target="_blank" rel="noopener" class="cyber-user-link">
+                    <i
+                        class="fas fa-external-link-alt"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        title="{{ user.website }}"
+                    ></i>
+                  </a>
+                {% endif %}
+              </td>
+
+              <td class="d-none d-md-table-cell">
+                {% if user.affiliation %}
+
+                  {% if user.affiliation | length > 50 %}
+                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="{{ user.affiliation }}" class="cyber-user-link">
+                        {% if user.affiliation %}{{ user.affiliation | truncate(50) }}{% endif %}
+                    </span>
+                  {% else %}
+                    <span class="cyber-user-link">
+                      {% if user.affiliation %}
+                        {{ user.affiliation | truncate(50) }}
+                      {% endif %}
+                    </span>
+                  {% endif %}
+
+                {% endif %}
+              </td>
+
+              <td class="d-none d-md-table-cell">
+						<span class="cyber-user-link">
+							{% if user.country %}
+                  <i class="flag-{{ user.country.lower() }}"></i>
+                  {{ lookup_country_code(user.country) }}
+                {% endif %}
+						</span>
+              </td>
+            </tr>
+          {% endfor %}
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if users.pages > 1 %}
+      <div class="row">
+        <div class="col-md-12">
+          <div class="cyber-pagination text-center">
+            <span class="cyber-pagination-label">{% trans %}页码{% endtrans %}</span>
+
+            {% if users.page != 1 %}
+              <a href="{{ prev_page }}" class="cyber-pagination-prev">&lt;&lt;&lt;</a>
+            {% endif %}
+
+            <select class="cyber-page-select">
+              {% for page in range(1, users.pages + 1) %}
+                <option {% if users.page == page %}selected{% endif %}>{{ page }}</option>
+              {% endfor %}
+            </select>
+
+            {% if users.next_num %}
+              <a href="{{ next_page }}" class="cyber-pagination-next">&gt;&gt;&gt;</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ Assets.js("assets/js/users/list.js") }}
+{% endblock %}

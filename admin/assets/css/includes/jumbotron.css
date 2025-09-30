@@ -1,0 +1,6 @@
+/* Move down content because we have a fixed navbar that is 3.5rem tall */
+main {
+  padding-top: 3.5rem;
+  background: var(--cyber-dark-surface);
+  min-height: calc(100vh - 3.5rem);
+}

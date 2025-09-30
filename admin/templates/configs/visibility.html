@@ -1,0 +1,51 @@
+<div role="tabpanel" class="tab-pane config-section" id="visibility">
+	{% 
+		with form = Forms.config.VisibilitySettingsForm(
+			challenge_visibility=challenge_visibility, 
+			account_visibility=account_visibility, 
+			score_visibility=score_visibility, 
+			registration_visibility=registration_visibility
+		) 
+	%}
+	<form method="POST" autocomplete="off" class="w-100">
+		<div class="form-group">
+			{{ form.challenge_visibility.label }}
+			{{ form.challenge_visibility(class="form-control custom-select") }}
+			<small class="form-text text-muted">
+				{{ form.challenge_visibility.description }}
+			</small>
+		</div>
+
+		<div class="form-group">
+			{{ form.account_visibility.label }}
+			{{ form.account_visibility(class="form-control custom-select") }}
+			<small class="form-text text-muted">
+				{{ form.account_visibility.description }}
+			</small>
+		</div>
+
+		<div class="form-group">
+			{{ form.score_visibility.label }}
+			{{ form.score_visibility(class="form-control custom-select") }}
+			<small class="form-text text-muted">
+				{{ form.score_visibility.description }}
+			</small>
+			<small class="form-text text-muted py-2">
+					分数可见性是账户可见性的子集。
+					这意味着如果账户对用户可见，那么分数可见性将控制他们是否可以看到该用户的分数。
+					如果账户不可见，则分数可见性没有效果。
+				</small>
+		</div>
+
+		<div class="form-group">
+			{{ form.registration_visibility.label }}
+			{{ form.registration_visibility(class="form-control custom-select") }}
+			<small class="form-text text-muted">
+				{{ form.registration_visibility.description }}
+			</small>
+		</div>
+
+		<button type="submit" class="btn btn-md btn-primary float-right">更新</button>
+	</form>
+	{% endwith %}
+</div>

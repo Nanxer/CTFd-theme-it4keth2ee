@@ -49,7 +49,7 @@ yarn build
 
 ### 安装到CTFd
 
-使用admin文件夹替换原有CTFd/CTFd/theme中的admin文件夹，并将it4yethee主题文件夹复制到CTFd的themes目录下，然后在CTFd管理后台选择该主题即可。
+使用admin文件夹替换原有CTFd/CTFd/themes中的admin文件夹，并将it4keth2ee主题文件夹复制到CTFd的themes目录下，然后在CTFd管理后台选择该主题即可。
 
 ### 通知界面汉化
 
@@ -92,7 +92,7 @@ class NotificationForm(BaseForm):
 
 ### 许可证
 
-本项目基于 [MIT 许可证](LICENSE) 开源。
+本项目基于 [MIT 许可证](https://opensource.org/licenses/MIT) 开源。
 
 ### 使用条款
 
